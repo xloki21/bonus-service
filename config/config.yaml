@@ -1,0 +1,14 @@
+mode: "debug"
+server:
+  address: "localhost:8082"
+store:
+  uri: "mongodb://mongo-1:27017,mongo-2:27017,mongo-3:27017"
+  authdb: "admin"
+  dbname: "appdb"
+accrual-service:
+  endpoint: "http://localhost:8082"
+  max_pool_size: 10
+  rps: 200
+transaction-service:
+  polling_interval: 500000000
+  max_transactions_per_request: 10
