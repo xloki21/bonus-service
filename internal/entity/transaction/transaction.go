@@ -27,6 +27,6 @@ type Transaction struct {
 	Status       Status         `bson:"status"`
 	Timestamp    int64          `bson:"timestamp"`
 	RegisteredAt int64          `bson:"registered_at"`
-	ProcessedAt  int64          `bson:"processed_at,omitempty"`
+	CompletedAt  int64          `bson:"completed_at,omitempty"`
 	Reward       uint           `bson:"reward,omitempty"`
 }

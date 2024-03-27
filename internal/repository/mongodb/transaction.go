@@ -63,9 +63,10 @@ func (t *TransactionMongoDB) run(ctx context.Context, f func(ctx context.Context
 
 // Update transaction status and reward
 func (t *TransactionMongoDB) Update(ctx context.Context, tx *transaction.Transaction) error {
+	fmt.Println("called!")
 	transactions := t.db.Collection(transactionsCollection)
 	filter := bson.M{"_id": tx.ID.(primitive.ObjectID)}
-	update := bson.M{"$set": bson.M{"status": tx.Status, "reward": tx.Reward, "processed_at": tx.ProcessedAt}}
+	update := bson.M{"$set": bson.M{"status": tx.Status, "reward": tx.Reward, "completed_at": tx.CompletedAt}}
 	_, err := transactions.UpdateOne(ctx, filter, update)
 	return err
 }
@@ -130,7 +131,7 @@ func (t *TransactionMongoDB) RewardAccounts(ctx context.Context, limit int64) er
 				bson.M{"_id": bson.M{"$in": tx.Transactions}},
 				bson.M{"$set": bson.D{
 					{Key: "status", Value: transaction.COMPLETED},
-					{Key: "processed_at", Value: time.Now().Unix()}}})
+					{Key: "completed_at", Value: time.Now().Unix()}}})
 			if err != nil {
 				return nil, fmt.Errorf("error during transactions completion: %w", err)
 			}
