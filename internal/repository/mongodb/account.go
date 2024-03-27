@@ -37,7 +37,7 @@ func (a *AccountMongoDB) Delete(ctx context.Context, account *t.Account) error {
 
 	opResult, err := accounts.DeleteOne(ctx, filter)
 	if err != nil {
-		return err
+		return fmt.Errorf("can't delete account: %w", err)
 	}
 	if opResult.DeletedCount == 0 {
 		return apperr.AccountNotFound

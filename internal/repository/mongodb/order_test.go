@@ -48,6 +48,9 @@ func TestOrderMongoDB_Register(t *testing.T) {
 		{
 			name: "already registered order",
 			precondition: func() error {
+				if err := or.db.Collection(ordersCollection).Drop(ctx); err != nil {
+					return err
+				}
 				return or.Register(ctx, testOrder)
 			},
 			args:        args{order: testOrder},

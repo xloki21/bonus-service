@@ -18,6 +18,5 @@ func (h *Handler) TESTAccrual(ctx *gin.Context) {
 	//	Timestamp:    int64(ts),
 	//	RegisteredAt: time.Now().Unix(),
 	//}
-
 	ctx.String(http.StatusOK, "100")
 }

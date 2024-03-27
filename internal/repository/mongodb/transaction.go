@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
 	"go.mongodb.org/mongo-driver/bson"
@@ -119,7 +120,10 @@ func (t *TransactionMongoDB) RewardAccounts(ctx context.Context, limit int64) er
 
 			result := accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": tx.Reward}})
 			if result.Err() != nil {
-				return nil, fmt.Errorf("error during account balance update: %w", result.Err())
+				if errors.Is(result.Err(), mongo.ErrNoDocuments) {
+					return nil, fmt.Errorf("account #{%s} balance update error: %w", filter[0].Value, apperr.AccountNotFound)
+				}
+				return nil, fmt.Errorf("account #{%s} balance update error: %w", filter[0].Value, result.Err())
 			}
 
 			opRes, err := transactions.UpdateMany(ctx,

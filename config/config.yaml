@@ -12,3 +12,6 @@ accrual-service:
 transaction-service:
   polling_interval: 500000000
   max_transactions_per_request: 10
+logger:
+  level: "warn"
+  encoding: "console"

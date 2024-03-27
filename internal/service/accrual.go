@@ -5,11 +5,13 @@ import (
 	"errors"
 	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
+	"github.com/xloki21/bonus-service/internal/pkg/log"
 	"github.com/xloki21/bonus-service/internal/repository"
 )
 
 type AccrualService struct {
-	repo repository.Transaction
+	repo   repository.Transaction
+	logger log.Logger
 }
 
 // RequestOrderReward requests order reward
@@ -31,6 +33,6 @@ func (a *AccrualService) RequestOrderReward(ctx context.Context, order *order.Or
 	return reward, nil
 }
 
-func NewAccrualService(repo repository.Transaction) *AccrualService {
-	return &AccrualService{repo: repo}
+func NewAccrualService(repo repository.Transaction, logger log.Logger) *AccrualService {
+	return &AccrualService{repo: repo, logger: logger}
 }

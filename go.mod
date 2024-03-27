@@ -4,10 +4,10 @@ go 1.21.5
 
 require (
 	github.com/gin-gonic/gin v1.9.1
-	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/spf13/viper v1.18.2
 	go.mongodb.org/mongo-driver v1.14.0
+	go.uber.org/zap v1.21.0
 )
 
 require (

@@ -5,6 +5,7 @@ import (
 	"github.com/xloki21/bonus-service/config"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/entity/order"
+	"github.com/xloki21/bonus-service/internal/pkg/log"
 	"github.com/xloki21/bonus-service/internal/repository"
 )
 
@@ -33,11 +34,11 @@ type Service struct {
 	Transaction
 }
 
-func NewService(repos *repository.Repository, cfg *config.AppConfig) *Service {
+func NewService(repos *repository.Repository, cfg *config.AppConfig, logger log.Logger) *Service {
 	return &Service{
-		Account:     NewAccountService(repos.Account),
-		Accrual:     NewAccrualService(repos.Transaction),
-		Order:       NewOrderService(repos.Order),
-		Transaction: NewTransactionService(repos.Transaction, cfg),
+		Account:     NewAccountService(repos.Account, logger),
+		Accrual:     NewAccrualService(repos.Transaction, logger),
+		Order:       NewOrderService(repos.Order, logger),
+		Transaction: NewTransactionService(repos.Transaction, cfg, logger),
 	}
 }
