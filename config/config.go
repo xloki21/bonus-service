@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/spf13/viper"
 	"github.com/xloki21/bonus-service/internal/repository/mongodb"
+	"os"
 	"time"
 )
 
@@ -75,8 +76,16 @@ func InitConfigFromViper() (*AppConfig, error) {
 	if err := viper.Unmarshal(cfg); err != nil {
 		return nil, err
 	}
+
+	if _, ok := os.LookupEnv("BS_USER"); !ok {
+		return nil, errors.New("missing environment variable BS_USER")
+	}
+
+	if _, ok := os.LookupEnv("BS_PASSWORD"); !ok {
+		return nil, errors.New("missing environment variable BS_PASSWORD")
+	}
+
 	cfg.DB.User = viper.GetString("user")
 	cfg.DB.Password = viper.GetString("password")
-
 	return cfg, nil
 }

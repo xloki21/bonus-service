@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/xloki21/bonus-service/config"
 	"github.com/xloki21/bonus-service/internal/application"
 	"github.com/xloki21/bonus-service/internal/pkg/log"
@@ -14,9 +15,13 @@ func main() {
 		panic(err)
 	}
 	logger := log.GetDefaultLogger(cfg.LoggerConfig)
-	app := application.New(cfg, logger)
+	app, err := application.New(cfg, logger)
+	if err != nil {
+		logger.Fatal(err)
+	}
 
 	if err := app.Run(context.Background()); err != nil {
-		return
+		fmt.Println("````1231231231313123123123123")
+		logger.Fatal(err)
 	}
 }

@@ -25,8 +25,11 @@ type Application struct {
 	logger   log.Logger
 }
 
-func New(cfg *config.AppConfig, logger log.Logger) *Application {
-	db, teardown, _ := mongodb.NewMongoDB(context.Background(), cfg.DB)
+func New(cfg *config.AppConfig, logger log.Logger) (*Application, error) {
+	db, teardown, err := mongodb.NewMongoDB(context.Background(), cfg.DB)
+	if err != nil {
+		return nil, err
+	}
 
 	repo := repository.NewRepositoryMongoDB(db)
 	services := service.NewService(repo, cfg, log.GetDefaultLogger(cfg.LoggerConfig))
@@ -37,7 +40,7 @@ func New(cfg *config.AppConfig, logger log.Logger) *Application {
 		teardown: teardown,
 		server:   &controller.Server{},
 		logger:   logger,
-	}
+	}, nil
 }
 
 func (a *Application) Run(ctx context.Context) error {
