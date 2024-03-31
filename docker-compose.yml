@@ -74,10 +74,10 @@ services:
     image: mongo:7.0.6
     container_name: mongo-setup
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_USERNAME: user
-      MONGO_PASSWORD: pass
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
+      MONGO_USERNAME: ${MONGO_USERNAME:-user}
+      MONGO_PASSWORD: ${MONGO_PASSWORD:-pass}
     depends_on:
       - mongo-1
       - mongo-2
