@@ -22,15 +22,20 @@ admin.auth(rootUser, rootPassword);
 admin.createUser({user: '$MONGO_USERNAME', pwd: '$MONGO_PASSWORD', roles: [{role: 'dbOwner', db: 'appdb'},{role: 'dbOwner', db: 'appdb_test'}]});
 var appdb = db.getSiblingDB('appdb');
 var appdb_test = db.getSiblingDB('appdb_test');
+
 appdb.createCollection('accounts');
 appdb.createCollection('orders');
-appdb.createCollection('events');
 appdb.createCollection('transactions');
+
+appdb.accounts.createIndex({"user_id":1}, {"unique":true})
+appdb.transactions.createIndex({"timestamp":1}, {"registered_at":1})
 
 appdb_test.createCollection('accounts');
 appdb_test.createCollection('orders');
-appdb_test.createCollection('events');
 appdb_test.createCollection('transactions');
+
+appdb_test.accounts.createIndex({"user_id":1}, {"unique":true})
+appdb_test.transactions.createIndex({"timestamp":1}, {"registered_at":1})
 
 var config = {
     "_id": "mgrs",

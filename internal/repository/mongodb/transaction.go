@@ -63,7 +63,6 @@ func (t *TransactionMongoDB) run(ctx context.Context, f func(ctx context.Context
 
 // Update transaction status and reward
 func (t *TransactionMongoDB) Update(ctx context.Context, tx *transaction.Transaction) error {
-	fmt.Println("called!")
 	transactions := t.db.Collection(transactionsCollection)
 	filter := bson.M{"_id": tx.ID.(primitive.ObjectID)}
 	update := bson.M{"$set": bson.M{"status": tx.Status, "reward": tx.Reward, "completed_at": tx.CompletedAt}}
