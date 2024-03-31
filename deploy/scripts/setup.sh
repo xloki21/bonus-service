@@ -14,8 +14,8 @@ echo "###### Working ${m1} instance found, initiating user setup & initializing 
 
 # setup user + pass and initialize replica sets
 mongosh --host ${m1}:${port} <<EOF
-var rootUser = 'admin';
-var rootPassword = 'password';
+var rootUser = '$MONGO_INITDB_ROOT_USERNAME';
+var rootPassword = '$MONGO_INITDB_ROOT_PASSWORD';
 var admin = db.getSiblingDB('admin');
 admin.auth(rootUser, rootPassword);
 

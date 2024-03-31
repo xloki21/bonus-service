@@ -8,8 +8,8 @@ services:
     container_name: mongo-1
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
       MONGO_USERNAME: ${MONGO_USERNAME:-user}
       MONGO_PASSWORD: ${MONGO_PASSWORD:-pass}
     ports:
