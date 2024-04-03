@@ -8,6 +8,7 @@ import (
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
 	"github.com/xloki21/bonus-service/internal/integration"
 	"github.com/xloki21/bonus-service/internal/repository"
+	"github.com/xloki21/bonus-service/pkg/log"
 	"math"
 	"sync"
 	"time"
@@ -29,25 +30,29 @@ type Service struct {
 
 // Polling is a blocking method that polls unprocessed transactions.
 func (t *Service) Polling(ctx context.Context) error {
+	logger, err := log.GetLogger()
+	if err != nil {
+		return err
+	}
 	successfulRounds := 0
-	//t.logger.Info("polling transactions...")
+	logger.Info("polling transactions...")
 	accrualServiceClient := integration.New(t.cfg.AccrualService)
 	ticker := time.NewTicker(t.cfg.TransactionServiceConfig.PollingInterval)
 	defer ticker.Stop() // Stop the ticker so it can be garbage collected
 	for {
 		select {
 		case <-ctx.Done():
-			//t.logger.Info("polling events listener stopped")
+			logger.Info("polling events listener stopped")
 			return ctx.Err()
 		case <-ticker.C:
-			//t.logger.Info("polling event triggered")
-			//t.logger.Info("find unprocessed transactions...")
+			logger.Info("polling event triggered")
+			logger.Info("find unprocessed transactions...")
 			txs, err := t.repo.FindUnprocessed(ctx, int64(t.cfg.TransactionServiceConfig.MaxTransactionsPerRequest))
 			if err != nil {
-				//t.logger.Warnf("polling event error on find unprocessed transactions: %v", err)
+				logger.Warnf("polling event error on find unprocessed transactions: %v", err)
 				continue
 			}
-			//t.logger.Info("processing transactions...")
+			logger.Info("processing transactions...")
 
 			if len(txs) == 0 {
 				continue
@@ -62,7 +67,7 @@ func (t *Service) Polling(ctx context.Context) error {
 					reward, err := accrualServiceClient.GetAccrual(ctx, &txs[index])
 					if err != nil {
 						errsCh <- err
-						//t.logger.Warnf("error during request to accrual service: %v", err)
+						logger.Warnf("error during request to accrual service: %v", err)
 						return
 					}
 
@@ -71,7 +76,7 @@ func (t *Service) Polling(ctx context.Context) error {
 
 					if err := t.repo.Update(ctx, &txs[index]); err != nil {
 						errsCh <- err
-						//t.logger.Warnf("polling event error on update transaction: %v", err)
+						logger.Warnf("polling event error on update transaction: %v", err)
 						return
 					}
 				}(wg, index)
@@ -100,9 +105,9 @@ func (t *Service) Polling(ctx context.Context) error {
 				accrualServiceClient.AdjustRPS(adjustedRPS)
 			}
 
-			//t.logger.Info("rewarding accounts...")
+			logger.Info("rewarding accounts...")
 			if err := t.repo.RewardAccounts(ctx, int64(t.cfg.TransactionServiceConfig.MaxTransactionsPerRequest)); err != nil {
-				//t.logger.Warnf("polling event error on reward accounts: %v", err)
+				logger.Warnf("polling event error on reward accounts: %v", err)
 			}
 		}
 	}

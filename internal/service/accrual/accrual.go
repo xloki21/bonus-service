@@ -18,6 +18,7 @@ type Service struct {
 
 // RequestOrderReward requests order reward.
 func (a *Service) RequestOrderReward(ctx context.Context, order *order.Order) (uint, error) {
+
 	transactions, err := a.repo.GetOrderTransactions(ctx, order)
 	if err != nil {
 		return 0, errors.New("accrual transactions not found")

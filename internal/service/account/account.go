@@ -6,6 +6,7 @@ import (
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/repository"
+	"github.com/xloki21/bonus-service/pkg/log"
 )
 
 type Account interface {
@@ -19,8 +20,12 @@ type Service struct {
 }
 
 func (a *Service) Credit(ctx context.Context, id account.UserID, value int) error {
+	logger, err := log.GetLogger()
+	if err != nil {
+		return err
+	}
 	if value < 0 {
-		//a.logger.Warnf("credit value is negative: %d", value)
+		logger.Warnf("credit value is negative: %d", value)
 		return apperr.InvalidCreditValue
 	}
 
@@ -28,8 +33,12 @@ func (a *Service) Credit(ctx context.Context, id account.UserID, value int) erro
 }
 
 func (a *Service) Debit(ctx context.Context, id account.UserID, value int) error {
+	logger, err := log.GetLogger()
+	if err != nil {
+		return err
+	}
 	if value < 0 {
-		//a.logger.Warnf("debit value is negative: %d", value)
+		logger.Warnf("debit value is negative: %d", value)
 		return apperr.InvalidDebitValue
 	}
 
@@ -37,20 +46,22 @@ func (a *Service) Debit(ctx context.Context, id account.UserID, value int) error
 }
 
 func (a *Service) CreateAccount(ctx context.Context, value int) (*account.Account, error) {
-
+	logger, err := log.GetLogger()
+	if err != nil {
+		return nil, err
+	}
 	acc := &account.Account{
 		ID:      account.UserID(uuid.NewString()),
 		Balance: value,
 	}
 
 	if err := acc.Validate(); err != nil {
-		//a.logger.Warnf("account validation failed: %s", err.Error())
+		logger.Warnf("account validation failed: %s", err.Error())
 		return nil, err
 	}
 
-	err := a.accounts.Create(ctx, acc)
-	if err != nil {
-		//a.logger.Warnf("account creation failed: %s", err.Error())
+	if err := a.accounts.Create(ctx, acc); err != nil {
+		logger.Warnf("account creation failed: %s", err.Error())
 		return nil, err
 	}
 	return acc, nil

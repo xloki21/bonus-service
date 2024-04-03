@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 
-	logger := log.GetDefaultLogger(cfg.LoggerConfig)
+	logger := log.BuildLogger(cfg.LoggerConfig)
 	app, err := application.New(cfg)
 	if err != nil {
 		logger.Fatal(err)

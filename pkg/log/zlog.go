@@ -1,6 +1,7 @@
 package log
 
 import (
+	"errors"
 	"github.com/xloki21/bonus-service/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -26,7 +27,14 @@ func NewZapLogger(level string, encoding string) (*zap.Logger, error) {
 var defaultLogger Logger
 var once sync.Once
 
-func GetDefaultLogger(cfg *config.LoggerConfig) Logger {
+func GetLogger() (Logger, error) {
+	if defaultLogger == nil {
+		return nil, errors.New("default logger is not initialized")
+	}
+	return defaultLogger, nil
+}
+
+func BuildLogger(cfg *config.LoggerConfig) Logger {
 	once.Do(func() {
 		logger, err := NewZapLogger(cfg.Level, cfg.Encoding)
 		if err != nil {
