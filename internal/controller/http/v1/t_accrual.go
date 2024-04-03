@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// TESTAccrual test external service handler. If "OK" returns random int from [0, 10000) as response
+// TESTAccrual test external service handler. If "OK" returns random int from [0, 10000) as response.
 func (h *Handler) TESTAccrual(ctx *gin.Context) {
 	//ts, err := strconv.Atoi(ctx.Query("timestamp"))
 	//if err != nil {

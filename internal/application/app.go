@@ -6,10 +6,10 @@ import (
 	"github.com/xloki21/bonus-service/config"
 	controller "github.com/xloki21/bonus-service/internal/controller/http"
 	v1 "github.com/xloki21/bonus-service/internal/controller/http/v1"
-	"github.com/xloki21/bonus-service/internal/pkg/log"
 	"github.com/xloki21/bonus-service/internal/repository"
 	"github.com/xloki21/bonus-service/internal/repository/mongodb"
 	"github.com/xloki21/bonus-service/internal/service"
+	log2 "github.com/xloki21/bonus-service/pkg/log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -22,17 +22,17 @@ type Application struct {
 	services *service.Service
 	teardown func(context.Context) error
 	server   *controller.Server
-	logger   log.Logger
+	logger   log2.Logger
 }
 
-func New(cfg *config.AppConfig, logger log.Logger) (*Application, error) {
+func New(cfg *config.AppConfig, logger log2.Logger) (*Application, error) {
 	db, teardown, err := mongodb.NewMongoDB(context.Background(), cfg.DB)
 	if err != nil {
 		return nil, err
 	}
 
 	repo := repository.NewRepositoryMongoDB(db)
-	services := service.NewService(repo, cfg, log.GetDefaultLogger(cfg.LoggerConfig))
+	services := service.NewService(repo, cfg, log2.GetDefaultLogger(cfg.LoggerConfig))
 	return &Application{
 		cfg:      cfg,
 		repo:     repo,

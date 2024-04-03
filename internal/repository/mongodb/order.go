@@ -19,7 +19,7 @@ func NewOrderMongoDB(db *mongo.Database) *OrderMongoDB {
 	return &OrderMongoDB{db: db}
 }
 
-// Register order to repository and create transactions
+// Register order to repository and create transactions.
 func (o *OrderMongoDB) Register(ctx context.Context, order *t.Order) error {
 	var orders = o.db.Collection(ordersCollection)
 	var transactions = o.db.Collection(transactionsCollection)

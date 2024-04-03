@@ -8,8 +8,8 @@ import (
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/entity/order"
-	"github.com/xloki21/bonus-service/internal/pkg/log"
 	"github.com/xloki21/bonus-service/internal/repository/mongodb"
+	"github.com/xloki21/bonus-service/pkg/log"
 	"testing"
 	"time"
 )

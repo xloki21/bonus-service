@@ -11,6 +11,7 @@ const MaxOrderGoodsAmount = 100
 
 type GoodID string
 
+// Validate validate GoodID.
 func (id GoodID) Validate() error {
 	if _, err := uuid.Parse(string(id)); err != nil {
 		return err
@@ -18,11 +19,7 @@ func (id GoodID) Validate() error {
 	return nil
 }
 
-// Order Пользовательский заказ-покупка
-// - все поля обязтельны
-// - элементы goods уникалены, даже если пользователь купил два товара, начисление производится только на один
-// - масмимальное количество элементов goods - 100
-// - время всегда в UTC
+// Order struct is used to store order data.
 type Order struct {
 	UserID    account.UserID `json:"user_id" bson:"user_id"`
 	Goods     []GoodID       `json:"goods" bson:"goods"`

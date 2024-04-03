@@ -7,7 +7,7 @@ import (
 	"github.com/xloki21/bonus-service/config"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
-	"github.com/xloki21/bonus-service/internal/pkg/httppc"
+	"github.com/xloki21/bonus-service/pkg/httppc"
 	"io"
 	"net/http"
 )

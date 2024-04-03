@@ -5,8 +5,8 @@ import (
 	"github.com/xloki21/bonus-service/config"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/entity/order"
-	"github.com/xloki21/bonus-service/internal/pkg/log"
 	"github.com/xloki21/bonus-service/internal/repository"
+	"github.com/xloki21/bonus-service/pkg/log"
 )
 
 type Account interface {

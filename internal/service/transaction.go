@@ -7,8 +7,8 @@ import (
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
 	"github.com/xloki21/bonus-service/internal/integration"
-	"github.com/xloki21/bonus-service/internal/pkg/log"
 	"github.com/xloki21/bonus-service/internal/repository"
+	"github.com/xloki21/bonus-service/pkg/log"
 	"math"
 	"sync"
 	"time"
@@ -25,7 +25,7 @@ type TransactionService struct {
 	logger log.Logger
 }
 
-// Polling is a blocking method that polls unprocessed transactions
+// Polling is a blocking method that polls unprocessed transactions.
 func (t *TransactionService) Polling(ctx context.Context) error {
 	successfulRounds := 0
 	t.logger.Info("polling transactions...")

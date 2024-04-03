@@ -61,7 +61,7 @@ func (t *TransactionMongoDB) run(ctx context.Context, f func(ctx context.Context
 	return result, nil
 }
 
-// Update transaction status and reward
+// Update transaction status and reward.
 func (t *TransactionMongoDB) Update(ctx context.Context, tx *transaction.Transaction) error {
 	transactions := t.db.Collection(transactionsCollection)
 	filter := bson.M{"_id": tx.ID.(primitive.ObjectID)}
@@ -70,7 +70,7 @@ func (t *TransactionMongoDB) Update(ctx context.Context, tx *transaction.Transac
 	return err
 }
 
-// RewardAccounts used to update accounts balance
+// RewardAccounts used to update accounts balance.
 func (t *TransactionMongoDB) RewardAccounts(ctx context.Context, limit int64) error {
 	transactions := t.db.Collection(transactionsCollection)
 	var opts = options.Aggregate()
@@ -148,6 +148,7 @@ func (t *TransactionMongoDB) RewardAccounts(ctx context.Context, limit int64) er
 	return nil
 }
 
+// FindUnprocessed returns unprocessed transactions.
 func (t *TransactionMongoDB) FindUnprocessed(ctx context.Context, limit int64) ([]transaction.Transaction, error) {
 	transactions := t.db.Collection(transactionsCollection)
 	var opts = options.Find()

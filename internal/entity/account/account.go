@@ -6,7 +6,7 @@ import (
 	"math/rand"
 )
 
-// UserID UUIDv string user identifier
+// UserID UUIDv4 string user identifier.
 type UserID string
 
 func (u UserID) Validate() error {
@@ -16,7 +16,7 @@ func (u UserID) Validate() error {
 	return nil
 }
 
-// Account user account in loyalty program
+// Account user account in loyalty program.
 type Account struct {
 	ID      UserID `json:"user_id" bson:"user_id"`
 	Balance int    `json:"balance" bson:"balance"`

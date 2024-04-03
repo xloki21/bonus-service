@@ -1,3 +1,4 @@
 .idea
 /deploy/scripts/mongo-replica.key
 /bonuse-service
+/TODO.txt

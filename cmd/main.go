@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/xloki21/bonus-service/config"
 	"github.com/xloki21/bonus-service/internal/application"
-	"github.com/xloki21/bonus-service/internal/pkg/log"
+	"github.com/xloki21/bonus-service/pkg/log"
 )
 
 func main() {

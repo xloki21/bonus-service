@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"github.com/xloki21/bonus-service/internal/entity/order"
-	"github.com/xloki21/bonus-service/internal/pkg/log"
 	"github.com/xloki21/bonus-service/internal/repository"
+	"github.com/xloki21/bonus-service/pkg/log"
 )
 
 type OrderService struct {

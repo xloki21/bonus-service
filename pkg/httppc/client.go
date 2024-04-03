@@ -8,15 +8,15 @@ import (
 type Client struct {
 	client       *http.Client
 	maxPoolSize  int
-	sem          chan interface{}
+	sem          chan struct{}
 	reqPerSecond int
 	rateLimiter  <-chan time.Time
 }
 
 func New(maxPoolSize int, reqPerSec int) *Client {
-	var sem chan interface{} = nil
+	var sem chan struct{} = nil
 	if maxPoolSize > 0 {
-		sem = make(chan interface{}, maxPoolSize)
+		sem = make(chan struct{}, maxPoolSize)
 	}
 
 	var emitter <-chan time.Time = nil
