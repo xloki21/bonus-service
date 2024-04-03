@@ -10,7 +10,7 @@ import (
 )
 
 type Order interface {
-	Register(ctx context.Context, order *order.Order) error
+	Register(ctx context.Context, o *order.Order) error
 }
 
 type Account interface {

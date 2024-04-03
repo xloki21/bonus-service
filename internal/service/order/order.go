@@ -7,10 +7,6 @@ import (
 	"github.com/xloki21/bonus-service/pkg/log"
 )
 
-type Order interface {
-	Register(context.Context, *order.Order) error
-}
-
 type Service struct {
 	orders repository.Order
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/xloki21/bonus-service/internal/repository"
 	"github.com/xloki21/bonus-service/internal/repository/mongodb"
 	"github.com/xloki21/bonus-service/internal/service"
+	"github.com/xloki21/bonus-service/pkg/log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -41,7 +42,11 @@ func New(cfg config.AppConfig) (*Application, error) {
 }
 
 func (a *Application) Run(ctx context.Context) error {
-	//a.logger.Info("Application started")
+	logger, err := log.GetLogger()
+	if err != nil {
+		return err
+	}
+	logger.Info("Application started")
 	defer func() {
 		if err := a.teardown(ctx); err != nil {
 			panic(err)
