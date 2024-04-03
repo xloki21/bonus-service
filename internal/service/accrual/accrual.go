@@ -6,20 +6,18 @@ import (
 	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
 	"github.com/xloki21/bonus-service/internal/repository"
-	"github.com/xloki21/bonus-service/pkg/log"
 )
 
 type Accrual interface {
 	RequestOrderReward(ctx context.Context, order *order.Order) (uint, error)
 }
 
-type AccrualService struct {
-	repo   repository.Transaction
-	logger log.Logger
+type Service struct {
+	repo repository.Transaction
 }
 
 // RequestOrderReward requests order reward.
-func (a *AccrualService) RequestOrderReward(ctx context.Context, order *order.Order) (uint, error) {
+func (a *Service) RequestOrderReward(ctx context.Context, order *order.Order) (uint, error) {
 	transactions, err := a.repo.GetOrderTransactions(ctx, order)
 	if err != nil {
 		return 0, errors.New("accrual transactions not found")
@@ -37,6 +35,6 @@ func (a *AccrualService) RequestOrderReward(ctx context.Context, order *order.Or
 	return reward, nil
 }
 
-func NewAccrualService(repo repository.Transaction, logger log.Logger) *AccrualService {
-	return &AccrualService{repo: repo, logger: logger}
+func NewAccrualService(repo repository.Transaction) *Service {
+	return &Service{repo: repo}
 }

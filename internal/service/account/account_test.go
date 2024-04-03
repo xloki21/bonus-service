@@ -3,11 +3,9 @@ package account
 import (
 	"context"
 	"errors"
-	"github.com/xloki21/bonus-service/config"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/repository/mongodb"
-	"github.com/xloki21/bonus-service/pkg/log"
 	"testing"
 )
 
@@ -25,10 +23,7 @@ func TestAccountService_Credit(t *testing.T) {
 	}()
 
 	repo := mongodb.NewAccountMongoDB(db)
-	s := NewAccountService(repo, log.GetDefaultLogger(&config.LoggerConfig{
-		Level:    "error",
-		Encoding: "console",
-	}))
+	s := NewAccountService(repo)
 
 	type args struct {
 		id    account.UserID
@@ -82,10 +77,7 @@ func TestAccountService_Debit(t *testing.T) {
 	}()
 
 	repo := mongodb.NewAccountMongoDB(db)
-	s := NewAccountService(repo, log.GetDefaultLogger(&config.LoggerConfig{
-		Level:    "error",
-		Encoding: "console",
-	}))
+	s := NewAccountService(repo)
 
 	type args struct {
 		id    account.UserID
@@ -145,10 +137,7 @@ func TestAccountService_CreateAccount(t *testing.T) {
 	}()
 
 	repo := mongodb.NewAccountMongoDB(db)
-	s := NewAccountService(repo, log.GetDefaultLogger(&config.LoggerConfig{
-		Level:    "error",
-		Encoding: "console",
-	}))
+	s := NewAccountService(repo)
 
 	type testCase struct {
 		name        string

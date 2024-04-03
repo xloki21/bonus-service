@@ -16,7 +16,7 @@ func main() {
 	}
 
 	logger := log.GetDefaultLogger(cfg.LoggerConfig)
-	app, err := application.New(cfg, logger)
+	app, err := application.New(cfg)
 	if err != nil {
 		logger.Fatal(err)
 	}

@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
-	"github.com/xloki21/bonus-service/config"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/repository/mongodb"
-	"github.com/xloki21/bonus-service/pkg/log"
 	"testing"
 	"time"
 )
@@ -28,10 +26,7 @@ func TestOrderService_Register(t *testing.T) {
 	}()
 
 	repo := mongodb.NewOrderMongoDB(db)
-	s := NewOrderService(repo, log.GetDefaultLogger(&config.LoggerConfig{
-		Level:    "info",
-		Encoding: "console",
-	}))
+	s := NewOrderService(repo)
 	type args struct {
 		order *order.Order
 	}

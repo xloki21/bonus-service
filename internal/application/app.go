@@ -9,7 +9,6 @@ import (
 	"github.com/xloki21/bonus-service/internal/repository"
 	"github.com/xloki21/bonus-service/internal/repository/mongodb"
 	"github.com/xloki21/bonus-service/internal/service"
-	log2 "github.com/xloki21/bonus-service/pkg/log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -22,29 +21,27 @@ type Application struct {
 	services *service.Service
 	teardown func(context.Context) error
 	server   *controller.Server
-	logger   log2.Logger
 }
 
-func New(cfg *config.AppConfig, logger log2.Logger) (*Application, error) {
+func New(cfg *config.AppConfig) (*Application, error) {
 	db, teardown, err := mongodb.NewMongoDB(context.Background(), cfg.DB)
 	if err != nil {
 		return nil, err
 	}
 
 	repo := repository.NewRepositoryMongoDB(db)
-	services := service.NewService(repo, cfg, log2.GetDefaultLogger(cfg.LoggerConfig))
+	services := service.NewService(repo, cfg)
 	return &Application{
 		cfg:      cfg,
 		repo:     repo,
 		services: services,
 		teardown: teardown,
 		server:   &controller.Server{},
-		logger:   logger,
 	}, nil
 }
 
 func (a *Application) Run(ctx context.Context) error {
-	a.logger.Info("Application started")
+	//a.logger.Info("Application started")
 	defer func() {
 		if err := a.teardown(ctx); err != nil {
 			panic(err)
@@ -77,10 +74,10 @@ func (a *Application) Run(ctx context.Context) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	case err := <-errCh:
-		a.logger.Info("Server shutdown signal received")
+		//a.logger.Info("Server shutdown signal received")
 		return err
 	case <-quit:
-		a.logger.Info("Gracefully shutting down...")
+		//a.logger.Info("Gracefully shutting down...")
 		return nil
 	}
 }
