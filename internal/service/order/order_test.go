@@ -3,16 +3,16 @@ package order
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
 	"github.com/xloki21/bonus-service/internal/apperr"
-	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/repository/mongodb"
+	"github.com/xloki21/bonus-service/pkg/log"
 	"testing"
-	"time"
 )
 
 func TestOrderService_Register(t *testing.T) {
+	log.BuildLogger(&log.TestLoggerConfig)
+
 	ctx := context.Background()
 	db, teardown, err := mongodb.NewMongoDB(context.Background(), mongodb.TestDBConfig)
 
@@ -45,46 +45,6 @@ func TestOrderService_Register(t *testing.T) {
 			name:        "new order with 3 goods",
 			args:        args{order: order.TestOrder(3)},
 			expectedErr: nil,
-		},
-		{
-			name: "new order with empty goods list",
-			args: args{order: &order.Order{
-				UserID:    account.UserID(uuid.NewString()),
-				Goods:     make([]order.GoodID, 0),
-				Timestamp: time.Now().Unix(),
-			}},
-			expectedErr: apperr.OrderValidationFailed,
-		},
-		{
-			name: "new order with non-unique good indices in list",
-			args: args{order: &order.Order{
-				UserID: account.UserID(uuid.NewString()),
-				Goods: []order.GoodID{
-					order.GoodID("81755586-1269-4fe7-8141-6580290767da"),
-					order.GoodID("7c552789-9019-41bd-8c79-e73145757445"),
-					order.GoodID("81755586-1269-4fe7-8141-6580290767da"),
-				},
-				Timestamp: time.Now().Unix(),
-			}},
-			expectedErr: apperr.OrderValidationFailed,
-		},
-		{
-			name: "new order with invalid good indices in list",
-			args: args{order: &order.Order{
-				UserID: account.UserID(uuid.NewString()),
-				Goods: []order.GoodID{
-					order.GoodID("81755586-1269-4fe7-8141-6580290767da"),
-					order.GoodID("7c552789-9019-41bd-8c79-e73"),
-					order.GoodID("81755586-1269-4fe7-8141-6580290767da"),
-				},
-				Timestamp: time.Now().Unix(),
-			}},
-			expectedErr: apperr.OrderValidationFailed,
-		},
-		{
-			name:        "new order with exceeding amount of goods",
-			args:        args{order: order.TestOrder(order.MaxOrderGoodsAmount + 1)},
-			expectedErr: apperr.OrderValidationFailed,
 		},
 		{
 			name: "already registered order",

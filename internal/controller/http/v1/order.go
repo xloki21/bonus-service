@@ -12,7 +12,11 @@ func (h *Handler) RegisterOrder(ctx *gin.Context) {
 	var order = new(t.Order)
 
 	if err := ctx.ShouldBindJSON(order); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+	}
+
+	if err := order.Validate(); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": apperr.OrderValidationFailed})
 		return
 	}
 

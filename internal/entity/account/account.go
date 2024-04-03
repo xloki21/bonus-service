@@ -35,8 +35,8 @@ func (u *Account) Validate() error {
 	return nil
 }
 
-func TestAccount() *Account {
-	return &Account{
+func TestAccount() Account {
+	return Account{
 		ID:      UserID(uuid.NewString()),
 		Balance: rand.Intn(2104),
 	}

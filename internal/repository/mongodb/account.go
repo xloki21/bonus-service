@@ -15,7 +15,7 @@ type AccountMongoDB struct {
 }
 
 // Create new account.
-func (a *AccountMongoDB) Create(ctx context.Context, account *t.Account) error {
+func (a *AccountMongoDB) Create(ctx context.Context, account t.Account) error {
 	accounts := a.db.Collection(accountsCollection)
 	filter := bson.D{bson.E{Key: "user_id", Value: account.ID}}
 	var result = new(t.Account)
@@ -31,7 +31,7 @@ func (a *AccountMongoDB) Create(ctx context.Context, account *t.Account) error {
 }
 
 // Delete the account.
-func (a *AccountMongoDB) Delete(ctx context.Context, account *t.Account) error {
+func (a *AccountMongoDB) Delete(ctx context.Context, account t.Account) error {
 	accounts := a.db.Collection(accountsCollection)
 	filter := bson.D{{Key: "user_id", Value: account.ID}}
 

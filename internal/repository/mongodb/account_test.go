@@ -25,7 +25,7 @@ func TestAccountMongoDB_Create(t *testing.T) {
 	r := NewAccountMongoDB(db)
 
 	type args struct {
-		account *account.Account
+		account account.Account
 	}
 
 	type testCase struct {

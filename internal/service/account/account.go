@@ -2,7 +2,6 @@ package account
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/repository"
@@ -10,7 +9,7 @@ import (
 )
 
 type Account interface {
-	CreateAccount(context.Context, int) (*account.Account, error)
+	CreateAccount(context.Context, account.Account) error
 	Credit(context.Context, account.UserID, int) error
 	Debit(context.Context, account.UserID, int) error
 }
@@ -45,26 +44,17 @@ func (a *Service) Debit(ctx context.Context, id account.UserID, value int) error
 	return a.accounts.Debit(ctx, id, value)
 }
 
-func (a *Service) CreateAccount(ctx context.Context, value int) (*account.Account, error) {
+func (a *Service) CreateAccount(ctx context.Context, account account.Account) error {
 	logger, err := log.GetLogger()
 	if err != nil {
-		return nil, err
-	}
-	acc := &account.Account{
-		ID:      account.UserID(uuid.NewString()),
-		Balance: value,
+		return err
 	}
 
-	if err := acc.Validate(); err != nil {
-		logger.Warnf("account validation failed: %s", err.Error())
-		return nil, err
-	}
-
-	if err := a.accounts.Create(ctx, acc); err != nil {
+	if err := a.accounts.Create(ctx, account); err != nil {
 		logger.Warnf("account creation failed: %s", err.Error())
-		return nil, err
+		return err
 	}
-	return acc, nil
+	return nil
 }
 
 func NewAccountService(accounts repository.Account) *Service {

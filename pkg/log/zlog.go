@@ -27,6 +27,11 @@ func NewZapLogger(level string, encoding string) (*zap.Logger, error) {
 var defaultLogger Logger
 var once sync.Once
 
+var TestLoggerConfig = config.LoggerConfig{
+	Level:    "error",
+	Encoding: "json",
+}
+
 func GetLogger() (Logger, error) {
 	if defaultLogger == nil {
 		return nil, errors.New("default logger is not initialized")
@@ -34,7 +39,7 @@ func GetLogger() (Logger, error) {
 	return defaultLogger, nil
 }
 
-func BuildLogger(cfg *config.LoggerConfig) Logger {
+func BuildLogger(cfg config.LoggerConfig) Logger {
 	once.Do(func() {
 		logger, err := NewZapLogger(cfg.Level, cfg.Encoding)
 		if err != nil {

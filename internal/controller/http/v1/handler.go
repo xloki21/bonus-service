@@ -24,7 +24,8 @@ func (h *Handler) ApiV1(mode string) *gin.Engine {
 	{
 		api.GET("/ping", h.Ping)
 		api.POST("/register", h.RegisterOrder)
-		api.POST("/decrease", h.Decrease)
+		api.POST("/account", h.RegisterAccount)
+		api.POST("/decrease", h.DecreaseBalance)
 	}
 
 	return router

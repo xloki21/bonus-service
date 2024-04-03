@@ -20,10 +20,6 @@ func (o *Service) Register(ctx context.Context, order *order.Order) error {
 	if err != nil {
 		return err
 	}
-	if err := order.Validate(); err != nil {
-		logger.Warnf("order validation failed: %v", err)
-		return err
-	}
 
 	if err := o.orders.Register(ctx, order); err != nil {
 		logger.Warnf("order registration failed: %v", err)

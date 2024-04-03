@@ -14,8 +14,8 @@ type Order interface {
 }
 
 type Account interface {
-	Create(context.Context, *account.Account) error
-	Delete(context.Context, *account.Account) error
+	Create(context.Context, account.Account) error
+	Delete(context.Context, account.Account) error
 	FindByID(context.Context, account.UserID) (*account.Account, error)
 	GetBalance(context.Context, account.UserID) (int, error)
 	Credit(context.Context, account.UserID, int) error

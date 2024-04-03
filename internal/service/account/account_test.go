@@ -6,10 +6,12 @@ import (
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/repository/mongodb"
+	"github.com/xloki21/bonus-service/pkg/log"
 	"testing"
 )
 
 func TestAccountService_Credit(t *testing.T) {
+	log.BuildLogger(log.TestLoggerConfig)
 	ctx := context.Background()
 	db, teardown, err := mongodb.NewMongoDB(context.Background(), mongodb.TestDBConfig)
 
@@ -35,9 +37,8 @@ func TestAccountService_Credit(t *testing.T) {
 		args        args
 		expectedErr error
 	}
-
-	testAccount, err := s.CreateAccount(ctx, 0)
-	if err != nil {
+	testAccount := account.TestAccount()
+	if err := s.CreateAccount(ctx, testAccount); err != nil {
 		t.Fatalf("failed to create test account: %v", err)
 	}
 
@@ -64,6 +65,7 @@ func TestAccountService_Credit(t *testing.T) {
 }
 
 func TestAccountService_Debit(t *testing.T) {
+	log.BuildLogger(log.TestLoggerConfig)
 	ctx := context.Background()
 	db, teardown, err := mongodb.NewMongoDB(context.Background(), mongodb.TestDBConfig)
 
@@ -90,9 +92,8 @@ func TestAccountService_Debit(t *testing.T) {
 		expectedErr error
 	}
 
-	testAccountBalance := 21000
-	testAccount, err := s.CreateAccount(ctx, testAccountBalance)
-	if err != nil {
+	testAccount := account.TestAccount()
+	if err := s.CreateAccount(ctx, testAccount); err != nil {
 		t.Fatalf("failed to create test account: %v", err)
 	}
 
@@ -104,12 +105,12 @@ func TestAccountService_Debit(t *testing.T) {
 		},
 		{
 			name:        "insufficient balance case",
-			args:        args{id: testAccount.ID, value: testAccountBalance + 1},
+			args:        args{id: testAccount.ID, value: testAccount.Balance + 1},
 			expectedErr: apperr.InsufficientBalance,
 		},
 		{
 			name:        "sufficient balance case",
-			args:        args{id: testAccount.ID, value: testAccountBalance - 1},
+			args:        args{id: testAccount.ID, value: testAccount.Balance - 1},
 			expectedErr: nil,
 		},
 	}
@@ -125,6 +126,7 @@ func TestAccountService_Debit(t *testing.T) {
 
 func TestAccountService_CreateAccount(t *testing.T) {
 	ctx := context.Background()
+	log.BuildLogger(log.TestLoggerConfig)
 	db, teardown, err := mongodb.NewMongoDB(context.Background(), mongodb.TestDBConfig)
 
 	if err != nil {
@@ -151,16 +153,13 @@ func TestAccountService_CreateAccount(t *testing.T) {
 			value:       100,
 			expectedErr: nil,
 		},
-		{
-			name:        "with negative balance",
-			value:       -100,
-			expectedErr: apperr.AccountInvalidBalance,
-		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if _, err := s.CreateAccount(ctx, tc.value); !errors.Is(err, tc.expectedErr) {
+			testAccount := account.TestAccount()
+			testAccount.Balance = tc.value
+			if err := s.CreateAccount(ctx, testAccount); !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
 			}
 		})
