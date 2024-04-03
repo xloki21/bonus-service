@@ -21,8 +21,8 @@ func NewOrderMongoDB(db *mongo.Database) *OrderMongoDB {
 
 // Register order to repository and create transactions.
 func (o *OrderMongoDB) Register(ctx context.Context, order *t.Order) error {
-	var orders = o.db.Collection(ordersCollection)
-	var transactions = o.db.Collection(transactionsCollection)
+	orders := o.db.Collection(ordersCollection)
+	transactions := o.db.Collection(transactionsCollection)
 	filter := bson.D{
 		{Key: "user_id", Value: order.UserID},
 		{Key: "timestamp", Value: order.Timestamp},

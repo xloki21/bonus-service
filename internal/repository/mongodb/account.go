@@ -16,7 +16,7 @@ type AccountMongoDB struct {
 
 // Create new account.
 func (a *AccountMongoDB) Create(ctx context.Context, account *t.Account) error {
-	var accounts = a.db.Collection(accountsCollection)
+	accounts := a.db.Collection(accountsCollection)
 	filter := bson.D{bson.E{Key: "user_id", Value: account.ID}}
 	var result = new(t.Account)
 
@@ -32,7 +32,7 @@ func (a *AccountMongoDB) Create(ctx context.Context, account *t.Account) error {
 
 // Delete the account.
 func (a *AccountMongoDB) Delete(ctx context.Context, account *t.Account) error {
-	var accounts = a.db.Collection(accountsCollection)
+	accounts := a.db.Collection(accountsCollection)
 	filter := bson.D{{Key: "user_id", Value: account.ID}}
 
 	opResult, err := accounts.DeleteOne(ctx, filter)
@@ -47,7 +47,7 @@ func (a *AccountMongoDB) Delete(ctx context.Context, account *t.Account) error {
 
 // FindByID finds account by user id.
 func (a *AccountMongoDB) FindByID(ctx context.Context, id t.UserID) (*t.Account, error) {
-	var accounts = a.db.Collection(accountsCollection)
+	accounts := a.db.Collection(accountsCollection)
 
 	filter := bson.D{{Key: "user_id", Value: id}}
 
@@ -61,7 +61,7 @@ func (a *AccountMongoDB) FindByID(ctx context.Context, id t.UserID) (*t.Account,
 
 // Credit credits account.
 func (a *AccountMongoDB) Credit(ctx context.Context, id t.UserID, value int) error {
-	var accounts = a.db.Collection(accountsCollection)
+	accounts := a.db.Collection(accountsCollection)
 	filter := bson.D{{Key: "user_id", Value: id}}
 
 	var result = accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": value}})
@@ -75,7 +75,7 @@ func (a *AccountMongoDB) Credit(ctx context.Context, id t.UserID, value int) err
 // Debit debits account.
 func (a *AccountMongoDB) Debit(ctx context.Context, id t.UserID, value int) error {
 
-	var accounts = a.db.Collection(accountsCollection)
+	accounts := a.db.Collection(accountsCollection)
 
 	filter := bson.D{{Key: "user_id", Value: id}}
 
