@@ -1,4 +1,4 @@
-package service
+package order
 
 import (
 	"context"
@@ -6,6 +6,10 @@ import (
 	"github.com/xloki21/bonus-service/internal/repository"
 	"github.com/xloki21/bonus-service/pkg/log"
 )
+
+type Order interface {
+	Register(context.Context, *order.Order) error
+}
 
 type OrderService struct {
 	orders repository.Order

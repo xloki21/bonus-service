@@ -1,4 +1,4 @@
-package service
+package account
 
 import (
 	"context"
@@ -8,6 +8,12 @@ import (
 	"github.com/xloki21/bonus-service/internal/repository"
 	"github.com/xloki21/bonus-service/pkg/log"
 )
+
+type Account interface {
+	CreateAccount(context.Context, int) (*account.Account, error)
+	Credit(context.Context, account.UserID, int) error
+	Debit(context.Context, account.UserID, int) error
+}
 
 type AccountService struct {
 	accounts repository.Account

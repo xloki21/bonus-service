@@ -1,4 +1,4 @@
-package service
+package transaction
 
 import (
 	"context"
@@ -18,6 +18,10 @@ const (
 	minSuccessfulRoundsToRestoreRPS = 10
 	maxRequestsPerSecond            = 20
 )
+
+type Transaction interface {
+	Polling(ctx context.Context) error
+}
 
 type TransactionService struct {
 	cfg    *config.AppConfig

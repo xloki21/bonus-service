@@ -1,4 +1,4 @@
-package service
+package accrual
 
 import (
 	"context"
@@ -8,6 +8,10 @@ import (
 	"github.com/xloki21/bonus-service/internal/repository"
 	"github.com/xloki21/bonus-service/pkg/log"
 )
+
+type Accrual interface {
+	RequestOrderReward(ctx context.Context, order *order.Order) (uint, error)
+}
 
 type AccrualService struct {
 	repo   repository.Transaction
