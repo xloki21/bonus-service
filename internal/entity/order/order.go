@@ -21,9 +21,9 @@ func (id GoodID) Validate() error {
 
 // Order struct is used to store order data.
 type Order struct {
-	UserID    account.UserID `json:"user_id" bson:"user_id"`
-	Goods     []GoodID       `json:"goods" bson:"goods"`
-	Timestamp int64          `json:"timestamp" bson:"timestamp"`
+	UserID    account.UserID `json:"user_id" bson:"user_id" binding:"required"`
+	Goods     []GoodID       `json:"goods" bson:"goods" binding:"required"`
+	Timestamp int64          `json:"timestamp" bson:"timestamp" binding:"required"`
 }
 
 func (o Order) Validate() error {

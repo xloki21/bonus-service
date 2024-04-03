@@ -2,40 +2,71 @@ package accrual
 
 import (
 	"context"
-	"errors"
-	"github.com/xloki21/bonus-service/internal/entity/order"
+	"encoding/json"
+	"fmt"
+	"github.com/xloki21/bonus-service/config"
+	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
-	"github.com/xloki21/bonus-service/internal/repository"
+	"github.com/xloki21/bonus-service/pkg/httppc"
+	"io"
+	"net/http"
 )
 
-type Accrual interface {
-	RequestOrderReward(ctx context.Context, order *order.Order) (uint, error)
-}
-
 type Service struct {
-	repo repository.Transaction
+	Config config.AccrualServiceConfig
+	client *httppc.Client
 }
 
-// RequestOrderReward requests order reward.
-func (a *Service) RequestOrderReward(ctx context.Context, order *order.Order) (uint, error) {
+func (a *Service) GetAccrual(ctx context.Context, tx *transaction.Transaction) (uint, error) {
+	urlString := fmt.Sprintf("%s/info?user=%s&good=%s&timestamp=%d",
+		a.Config.Endpoint, tx.UserID, tx.GoodID, tx.Timestamp)
 
-	transactions, err := a.repo.GetOrderTransactions(ctx, order)
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, urlString, nil)
 	if err != nil {
-		return 0, errors.New("accrual transactions not found")
+		return 0, err
 	}
 
-	var reward uint = 0
-	for _, tx := range transactions {
-		if tx.Status == transaction.PROCESSED {
-			reward += tx.Reward
-		} else {
-			return 0, errors.New("accrual is not completed yet")
+	response, err := a.client.MakeRequest(request)
+	if err != nil {
+		return 0, err
+	}
+	defer response.Body.Close()
+
+	switch response.StatusCode {
+	case http.StatusOK:
+
+		bContent, err := io.ReadAll(response.Body)
+		if err != nil {
+			return 0, err
 		}
-	}
 
-	return reward, nil
+		if err := json.Unmarshal(bContent, &tx.Reward); err != nil {
+			return 0, err
+		}
+		return tx.Reward, nil
+
+	case http.StatusTooManyRequests:
+		return 0, apperr.AccrualServiceTooManyRequests
+	case http.StatusNotFound:
+		return 0, apperr.AccrualNotFound
+	default:
+		return 0, apperr.AccrualServiceInternalServerError
+	}
 }
 
-func NewAccrualService(repo repository.Transaction) *Service {
-	return &Service{repo: repo}
+func (a *Service) AdjustRPS(RPS int) {
+	a.Config.RPS = RPS
+	a.client = httppc.New(a.Config.MaxPoolSize, RPS)
+}
+
+func (a *Service) AdjustMaxPoolSize(MaxPoolSize int) {
+	a.Config.MaxPoolSize = MaxPoolSize
+	a.client = httppc.New(a.Config.MaxPoolSize, MaxPoolSize)
+}
+
+func New(config config.AccrualServiceConfig) *Service {
+	return &Service{
+		Config: config,
+		client: httppc.New(config.MaxPoolSize, config.RPS),
+	}
 }

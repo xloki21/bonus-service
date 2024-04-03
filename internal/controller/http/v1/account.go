@@ -10,8 +10,8 @@ import (
 )
 
 type decreaseBalanceRequest struct {
-	UserId account.UserID `json:"user_id"`
-	Sum    int            `json:"sum"`
+	UserId account.UserID `json:"user_id" binding:"required"`
+	Sum    int            `json:"sum" binding:"required"`
 }
 
 type registerAccountRequest struct {

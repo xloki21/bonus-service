@@ -6,8 +6,8 @@ import (
 	"github.com/xloki21/bonus-service/config"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
-	"github.com/xloki21/bonus-service/internal/integration"
 	"github.com/xloki21/bonus-service/internal/repository"
+	"github.com/xloki21/bonus-service/internal/service/accrual"
 	"github.com/xloki21/bonus-service/pkg/log"
 	"math"
 	"sync"
@@ -36,7 +36,7 @@ func (t *Service) Polling(ctx context.Context) error {
 	}
 	successfulRounds := 0
 	logger.Info("polling transactions...")
-	accrualServiceClient := integration.New(t.cfg.AccrualService)
+	accrualServiceClient := accrual.New(t.cfg.AccrualService)
 	ticker := time.NewTicker(t.cfg.TransactionServiceConfig.PollingInterval)
 	defer ticker.Stop() // Stop the ticker so it can be garbage collected
 	for {
