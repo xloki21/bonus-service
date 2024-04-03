@@ -18,7 +18,7 @@ func TestAccountMongoDB_Create(t *testing.T) {
 	}
 	defer func() {
 		if err := teardown(ctx); err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
 	}()
 
@@ -77,7 +77,7 @@ func TestAccountMongoDB_FindByID(t *testing.T) {
 	}
 	defer func() {
 		if err := teardown(ctx); err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
 	}()
 
@@ -134,7 +134,7 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 	}
 	defer func() {
 		if err := teardown(ctx); err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
 	}()
 
@@ -193,7 +193,7 @@ func TestAccountMongoDB_GetBalance(t *testing.T) {
 	}
 	defer func() {
 		if err := teardown(ctx); err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
 	}()
 
@@ -259,7 +259,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 	}
 	defer func() {
 		if err := teardown(ctx); err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
 	}()
 

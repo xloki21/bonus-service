@@ -20,7 +20,7 @@ func TestAccountService_Credit(t *testing.T) {
 	}
 	defer func() {
 		if err := teardown(ctx); err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
 	}()
 
@@ -74,7 +74,7 @@ func TestAccountService_Debit(t *testing.T) {
 	}
 	defer func() {
 		if err := teardown(ctx); err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
 	}()
 
@@ -134,7 +134,7 @@ func TestAccountService_CreateAccount(t *testing.T) {
 	}
 	defer func() {
 		if err := teardown(ctx); err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
 	}()
 

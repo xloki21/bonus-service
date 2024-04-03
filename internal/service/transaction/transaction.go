@@ -24,7 +24,7 @@ type Transaction interface {
 }
 
 type Service struct {
-	cfg  *config.AppConfig
+	cfg  config.AppConfig
 	repo repository.Transaction
 }
 
@@ -113,6 +113,6 @@ func (t *Service) Polling(ctx context.Context) error {
 	}
 }
 
-func NewTransactionService(transactions repository.Transaction, cfg *config.AppConfig) *Service {
+func NewTransactionService(transactions repository.Transaction, cfg config.AppConfig) *Service {
 	return &Service{repo: transactions, cfg: cfg}
 }

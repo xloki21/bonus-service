@@ -16,14 +16,14 @@ import (
 )
 
 type Application struct {
-	cfg      *config.AppConfig
+	cfg      config.AppConfig
 	repo     *repository.Repository
 	services *service.Service
 	teardown func(context.Context) error
 	server   *controller.Server
 }
 
-func New(cfg *config.AppConfig) (*Application, error) {
+func New(cfg config.AppConfig) (*Application, error) {
 	db, teardown, err := mongodb.NewMongoDB(context.Background(), cfg.DB)
 	if err != nil {
 		return nil, err

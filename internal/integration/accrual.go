@@ -13,7 +13,7 @@ import (
 )
 
 type AccrualServiceClient struct {
-	Config *config.AccrualServiceConfig
+	Config config.AccrualServiceConfig
 	client *httppc.Client
 }
 
@@ -64,7 +64,7 @@ func (a *AccrualServiceClient) AdjustMaxPoolSize(MaxPoolSize int) {
 	a.client = httppc.New(a.Config.MaxPoolSize, MaxPoolSize)
 }
 
-func New(config *config.AccrualServiceConfig) *AccrualServiceClient {
+func New(config config.AccrualServiceConfig) *AccrualServiceClient {
 	return &AccrualServiceClient{
 		Config: config,
 		client: httppc.New(config.MaxPoolSize, config.RPS),

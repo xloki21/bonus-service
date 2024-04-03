@@ -16,7 +16,7 @@ type Service struct {
 	transaction.Transaction
 }
 
-func NewService(repos *repository.Repository, cfg *config.AppConfig) *Service {
+func NewService(repos *repository.Repository, cfg config.AppConfig) *Service {
 	return &Service{
 		Account:     account.NewAccountService(repos.Account),
 		Accrual:     accrual.NewAccrualService(repos.Transaction),

@@ -11,7 +11,7 @@ import (
 )
 
 func TestOrderService_Register(t *testing.T) {
-	log.BuildLogger(&log.TestLoggerConfig)
+	log.BuildLogger(log.TestLoggerConfig)
 
 	ctx := context.Background()
 	db, teardown, err := mongodb.NewMongoDB(context.Background(), mongodb.TestDBConfig)
@@ -21,7 +21,7 @@ func TestOrderService_Register(t *testing.T) {
 	}
 	defer func() {
 		if err := teardown(ctx); err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
 	}()
 

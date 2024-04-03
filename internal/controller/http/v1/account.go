@@ -15,7 +15,7 @@ type decreaseBalanceRequest struct {
 }
 
 type registerAccountRequest struct {
-	Balance int `json:"balance"`
+	Balance int `json:"balance" binding:"required"`
 }
 
 // RegisterAccount register a new account with custom balance.
@@ -33,6 +33,11 @@ func (h *Handler) RegisterAccount(ctx *gin.Context) {
 	}
 	if err := newAccount.Validate(); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": apperr.AccountInvalidBalance})
+		return
+	}
+
+	if err := h.services.Account.CreateAccount(ctx, newAccount); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

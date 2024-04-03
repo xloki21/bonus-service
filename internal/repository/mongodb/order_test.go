@@ -19,7 +19,7 @@ func TestOrderMongoDB_Register(t *testing.T) {
 	}
 	defer func() {
 		if err := teardown(ctx); err != nil {
-			panic(err)
+			t.Fatal(err)
 		}
 	}()
 
