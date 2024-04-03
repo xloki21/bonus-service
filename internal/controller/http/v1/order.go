@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/xloki21/bonus-service/internal/apperr"
@@ -17,7 +16,7 @@ func (h *Handler) RegisterOrder(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.services.Order.Register(context.TODO(), order); err != nil {
+	if err := h.services.Order.Register(ctx, order); err != nil {
 		if errors.Is(err, apperr.OrderAlreadyRegistered) {
 			ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return

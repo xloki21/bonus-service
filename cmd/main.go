@@ -10,9 +10,11 @@ import (
 func main() {
 
 	cfg, err := config.InitConfigFromViper()
+
 	if err != nil {
 		panic(err)
 	}
+
 	logger := log.GetDefaultLogger(cfg.LoggerConfig)
 	app, err := application.New(cfg, logger)
 	if err != nil {
