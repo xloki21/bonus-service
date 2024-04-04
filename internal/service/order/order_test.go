@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/order"
+	"github.com/xloki21/bonus-service/internal/repo/mocks"
 	"github.com/xloki21/bonus-service/pkg/log"
 	"testing"
 )
@@ -19,7 +20,7 @@ func TestNewOrderService_Register(t *testing.T) {
 
 	t.Run("register New order", func(t *testing.T) {
 		t.Parallel()
-		mock := NewMockorderRepository(ctrl)
+		mock := mocks.NewMockOrder(ctrl)
 		s := NewOrderService(mock)
 
 		testOrder := order.TestOrder(100)
@@ -29,7 +30,7 @@ func TestNewOrderService_Register(t *testing.T) {
 
 	t.Run("register Already registered order", func(t *testing.T) {
 		t.Parallel()
-		mock := NewMockorderRepository(ctrl)
+		mock := mocks.NewMockOrder(ctrl)
 		s := NewOrderService(mock)
 
 		testOrder := order.TestOrder(100)

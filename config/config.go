@@ -3,7 +3,7 @@ package config
 import (
 	"errors"
 	"github.com/spf13/viper"
-	"github.com/xloki21/bonus-service/internal/repository/mongodb"
+	"github.com/xloki21/bonus-service/internal/repo/mongodb"
 	"os"
 	"time"
 )

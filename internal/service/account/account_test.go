@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
+	"github.com/xloki21/bonus-service/internal/repo/mocks"
 	"github.com/xloki21/bonus-service/pkg/log"
 	"testing"
 )
@@ -19,7 +20,7 @@ func TestAccountService_Debit(t *testing.T) {
 
 	t.Run("debit account with insufficient funds", func(t *testing.T) {
 		t.Parallel()
-		mock := NewMockaccountRepository(ctrl)
+		mock := mocks.NewMockAccount(ctrl)
 		s := NewAccountService(mock)
 		testAccount := account.TestAccount()
 
@@ -36,7 +37,7 @@ func TestAccountService_Debit(t *testing.T) {
 
 	t.Run("debit account with success", func(t *testing.T) {
 		t.Parallel()
-		mock := NewMockaccountRepository(ctrl)
+		mock := mocks.NewMockAccount(ctrl)
 		s := NewAccountService(mock)
 		testAccount := account.TestAccount()
 
@@ -62,7 +63,7 @@ func TestAccountService_Credit(t *testing.T) {
 
 	t.Run("credit account with success", func(t *testing.T) {
 		t.Parallel()
-		mock := NewMockaccountRepository(ctrl)
+		mock := mocks.NewMockAccount(ctrl)
 		s := NewAccountService(mock)
 		testAccount := account.TestAccount()
 
@@ -88,7 +89,7 @@ func TestAccountService_CreateAccount(t *testing.T) {
 
 	t.Run("create new account with success", func(t *testing.T) {
 		t.Parallel()
-		mock := NewMockaccountRepository(ctrl)
+		mock := mocks.NewMockAccount(ctrl)
 		s := NewAccountService(mock)
 		testAccount := account.TestAccount()
 
@@ -99,7 +100,7 @@ func TestAccountService_CreateAccount(t *testing.T) {
 
 	t.Run("create already registered account with fail", func(t *testing.T) {
 		t.Parallel()
-		mock := NewMockaccountRepository(ctrl)
+		mock := mocks.NewMockAccount(ctrl)
 		s := NewAccountService(mock)
 		testAccount := account.TestAccount()
 

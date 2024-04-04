@@ -3,12 +3,12 @@ package account
 import (
 	"context"
 	"github.com/xloki21/bonus-service/internal/entity/account"
-	"github.com/xloki21/bonus-service/internal/repository"
+	"github.com/xloki21/bonus-service/internal/repo"
 	"github.com/xloki21/bonus-service/pkg/log"
 )
 
 type Service struct {
-	accounts repository.Account
+	accounts repo.Account
 }
 
 func (a *Service) Credit(ctx context.Context, id account.UserID, value uint) error {
@@ -32,6 +32,6 @@ func (a *Service) CreateAccount(ctx context.Context, account account.Account) er
 	return nil
 }
 
-func NewAccountService(accounts repository.Account) *Service {
+func NewAccountService(accounts repo.Account) *Service {
 	return &Service{accounts: accounts}
 }

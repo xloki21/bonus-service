@@ -3,12 +3,12 @@ package order
 import (
 	"context"
 	"github.com/xloki21/bonus-service/internal/entity/order"
-	"github.com/xloki21/bonus-service/internal/repository"
+	"github.com/xloki21/bonus-service/internal/repo"
 	"github.com/xloki21/bonus-service/pkg/log"
 )
 
 type Service struct {
-	orders repository.Order
+	orders repo.Order
 }
 
 func (o *Service) Register(ctx context.Context, order order.Order) error {
@@ -25,6 +25,6 @@ func (o *Service) Register(ctx context.Context, order order.Order) error {
 	return nil
 }
 
-func NewOrderService(orders repository.Order) *Service {
+func NewOrderService(orders repo.Order) *Service {
 	return &Service{orders: orders}
 }

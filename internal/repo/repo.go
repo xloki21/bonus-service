@@ -1,11 +1,11 @@
-package repository
+package repo
 
 import (
 	"context"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
-	"github.com/xloki21/bonus-service/internal/repository/mongodb"
+	"github.com/xloki21/bonus-service/internal/repo/mongodb"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -13,6 +13,7 @@ type Order interface {
 	Register(ctx context.Context, o order.Order) error
 }
 
+//go:generate mockgen -destination=mocks/mocks.go -source=repo.go -package=mocks
 type Account interface {
 	Create(context.Context, account.Account) error
 	Delete(context.Context, account.Account) error

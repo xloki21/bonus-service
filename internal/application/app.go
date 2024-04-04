@@ -6,8 +6,8 @@ import (
 	"github.com/xloki21/bonus-service/config"
 	controller "github.com/xloki21/bonus-service/internal/controller/http"
 	v1 "github.com/xloki21/bonus-service/internal/controller/http/v1"
-	"github.com/xloki21/bonus-service/internal/repository"
-	"github.com/xloki21/bonus-service/internal/repository/mongodb"
+	"github.com/xloki21/bonus-service/internal/repo"
+	"github.com/xloki21/bonus-service/internal/repo/mongodb"
 	"github.com/xloki21/bonus-service/internal/service"
 	"github.com/xloki21/bonus-service/pkg/log"
 	"net/http"
@@ -18,7 +18,7 @@ import (
 
 type Application struct {
 	cfg      config.AppConfig
-	repo     *repository.Repository
+	repo     *repo.Repository
 	services *service.Service
 	teardown func(context.Context) error
 	server   *controller.Server
@@ -30,7 +30,7 @@ func New(cfg config.AppConfig) (*Application, error) {
 		return nil, err
 	}
 
-	repo := repository.NewRepositoryMongoDB(db)
+	repo := repo.NewRepositoryMongoDB(db)
 	services := service.NewService(repo, cfg)
 	return &Application{
 		cfg:      cfg,

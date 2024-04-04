@@ -6,7 +6,7 @@ import (
 	"github.com/xloki21/bonus-service/config"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
-	"github.com/xloki21/bonus-service/internal/repository"
+	"github.com/xloki21/bonus-service/internal/repo"
 	"github.com/xloki21/bonus-service/internal/service/accrual"
 	"github.com/xloki21/bonus-service/pkg/log"
 	"math"
@@ -25,7 +25,7 @@ type Transaction interface {
 
 type Service struct {
 	cfg  config.AppConfig
-	repo repository.Transaction
+	repo repo.Transaction
 }
 
 // Polling is a blocking method that polls unprocessed transactions.
@@ -113,6 +113,6 @@ func (t *Service) Polling(ctx context.Context) error {
 	}
 }
 
-func NewTransactionService(transactions repository.Transaction, cfg config.AppConfig) *Service {
+func NewTransactionService(transactions repo.Transaction, cfg config.AppConfig) *Service {
 	return &Service{repo: transactions, cfg: cfg}
 }
