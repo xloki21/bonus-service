@@ -10,21 +10,21 @@ import (
 )
 
 type Order interface {
-	Register(ctx context.Context, o *order.Order) error
+	Register(ctx context.Context, o order.Order) error
 }
 
 type Account interface {
 	Create(context.Context, account.Account) error
 	Delete(context.Context, account.Account) error
 	FindByID(context.Context, account.UserID) (*account.Account, error)
-	GetBalance(context.Context, account.UserID) (int, error)
-	Credit(context.Context, account.UserID, int) error
-	Debit(context.Context, account.UserID, int) error
+	GetBalance(context.Context, account.UserID) (uint, error)
+	Credit(context.Context, account.UserID, uint) error
+	Debit(context.Context, account.UserID, uint) error
 }
 
 type Transaction interface {
 	FindUnprocessed(ctx context.Context, limit int64) ([]transaction.Transaction, error)
-	GetOrderTransactions(context.Context, *order.Order) ([]transaction.Transaction, error)
+	GetOrderTransactions(context.Context, order.Order) ([]transaction.Transaction, error)
 	RewardAccounts(ctx context.Context, limit int64) error
 	Update(ctx context.Context, tx *transaction.Transaction) error
 }

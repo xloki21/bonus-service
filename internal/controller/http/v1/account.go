@@ -11,11 +11,11 @@ import (
 
 type decreaseBalanceRequest struct {
 	UserId account.UserID `json:"user_id" binding:"required"`
-	Sum    int            `json:"sum" binding:"required"`
+	Sum    uint           `json:"sum" binding:"required"`
 }
 
 type registerAccountRequest struct {
-	Balance int `json:"balance" binding:"required"`
+	Balance uint `json:"balance" binding:"required"`
 }
 
 // RegisterAccount register a new account with custom balance.

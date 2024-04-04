@@ -11,7 +11,7 @@ type Service struct {
 	orders repository.Order
 }
 
-func (o *Service) Register(ctx context.Context, order *order.Order) error {
+func (o *Service) Register(ctx context.Context, order order.Order) error {
 	logger, err := log.GetLogger()
 	if err != nil {
 		return err

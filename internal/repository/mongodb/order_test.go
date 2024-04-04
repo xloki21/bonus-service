@@ -26,7 +26,7 @@ func TestOrderMongoDB_Register(t *testing.T) {
 	or := NewOrderMongoDB(db)
 	tr := NewTransactionMongoDB(db)
 	type args struct {
-		order *order.Order
+		order order.Order
 	}
 
 	type testCase struct {

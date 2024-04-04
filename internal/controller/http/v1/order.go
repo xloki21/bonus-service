@@ -9,9 +9,9 @@ import (
 )
 
 func (h *Handler) RegisterOrder(ctx *gin.Context) {
-	var order = new(t.Order)
+	var order = t.Order{}
 
-	if err := ctx.ShouldBindJSON(order); err != nil {
+	if err := ctx.ShouldBindJSON(&order); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}

@@ -142,7 +142,7 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 
 	type args struct {
 		id    account.UserID
-		value int
+		value uint
 	}
 
 	type testCase struct {
@@ -208,17 +208,16 @@ func TestAccountMongoDB_GetBalance(t *testing.T) {
 		args          args
 		precondition  func() error
 		expectedErr   error
-		expectedValue int
+		expectedValue uint
 	}
 
 	testAccount := account.TestAccount()
 
 	testCases := []testCase{
 		{
-			name:          "unknown account id",
-			args:          args{id: account.UserID(uuid.NewString())},
-			expectedErr:   apperr.AccountNotFound,
-			expectedValue: 0,
+			name:        "unknown account id",
+			args:        args{id: account.UserID(uuid.NewString())},
+			expectedErr: apperr.AccountNotFound,
 		},
 		{
 			name: "existing account id",
@@ -267,7 +266,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 
 	type args struct {
 		id    account.UserID
-		value int
+		value uint
 	}
 
 	type testCase struct {
@@ -294,7 +293,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 			postcondition: func() error {
 				return r.Delete(ctx, testAccount)
 			},
-			args:        args{id: testAccount.ID, value: testAccount.Balance + 1},
+			args:        args{id: testAccount.ID, value: uint(testAccount.Balance + 1)},
 			expectedErr: apperr.InsufficientBalance,
 		},
 		{
@@ -305,7 +304,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 			postcondition: func() error {
 				return r.Delete(ctx, testAccount)
 			},
-			args:        args{id: testAccount.ID, value: testAccount.Balance - 1},
+			args:        args{id: testAccount.ID, value: uint(testAccount.Balance - 1)},
 			expectedErr: nil,
 		},
 	}

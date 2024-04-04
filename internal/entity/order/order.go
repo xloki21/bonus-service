@@ -49,12 +49,12 @@ func (o Order) Validate() error {
 	return nil
 }
 
-func TestOrder(goodsAmount int) *Order {
+func TestOrder(goodsAmount int) Order {
 	goods := make([]GoodID, 0, goodsAmount)
 	for i := 0; i < goodsAmount; i++ {
 		goods = append(goods, GoodID(uuid.NewString()))
 	}
-	return &Order{
+	return Order{
 		UserID:    account.UserID(uuid.NewString()),
 		Goods:     goods,
 		Timestamp: time.Now().Unix(),

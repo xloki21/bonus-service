@@ -22,7 +22,7 @@ func TestTransactionMongoDB_FindUnprocessed(t *testing.T) {
 	or := NewOrderMongoDB(db)
 	tr := NewTransactionMongoDB(db)
 	type args struct {
-		order *order.Order
+		order order.Order
 		limit int64
 	}
 

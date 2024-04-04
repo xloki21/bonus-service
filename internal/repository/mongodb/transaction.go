@@ -18,7 +18,7 @@ type TransactionMongoDB struct {
 	db *mongo.Database
 }
 
-func (t *TransactionMongoDB) GetOrderTransactions(ctx context.Context, order *order.Order) ([]transaction.Transaction, error) {
+func (t *TransactionMongoDB) GetOrderTransactions(ctx context.Context, order order.Order) ([]transaction.Transaction, error) {
 	transactions := t.db.Collection(transactionsCollection)
 	var opts = options.Find()
 

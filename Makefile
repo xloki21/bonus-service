@@ -12,3 +12,7 @@ test:
 lint:
 	golangci-lint run
 .DEFAULT_GOAL := build
+
+.PHONY: mocks
+mocks:
+	 go generate ./... -v

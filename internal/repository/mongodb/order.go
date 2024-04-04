@@ -20,7 +20,7 @@ func NewOrderMongoDB(db *mongo.Database) *OrderMongoDB {
 }
 
 // Register order to repository and create transactions.
-func (o *OrderMongoDB) Register(ctx context.Context, order *t.Order) error {
+func (o *OrderMongoDB) Register(ctx context.Context, order t.Order) error {
 	orders := o.db.Collection(ordersCollection)
 	transactions := o.db.Collection(transactionsCollection)
 	filter := bson.D{

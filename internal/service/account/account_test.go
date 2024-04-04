@@ -2,166 +2,111 @@ package account
 
 import (
 	"context"
-	"errors"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
-	"github.com/xloki21/bonus-service/internal/repository/mongodb"
 	"github.com/xloki21/bonus-service/pkg/log"
 	"testing"
 )
 
-func TestAccountService_Credit(t *testing.T) {
-	log.BuildLogger(log.TestLoggerConfig)
+func TestAccountService_Debit(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
-	db, teardown, err := mongodb.NewMongoDB(context.Background(), mongodb.TestDBConfig)
+	log.BuildLogger(log.TestLoggerConfig)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	if err != nil {
-		t.Fatalf("failed to connect to mongodb: %v", err)
-	}
-	defer func() {
-		if err := teardown(ctx); err != nil {
+	t.Run("debit account with insufficient funds", func(t *testing.T) {
+		t.Parallel()
+		mock := NewMockaccountRepository(ctrl)
+		s := NewAccountService(mock)
+		testAccount := account.TestAccount()
+
+		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
+		err := s.CreateAccount(ctx, testAccount)
+		if err != nil {
 			t.Fatal(err)
 		}
-	}()
+		value := uint(testAccount.Balance + 1)
+		mock.EXPECT().
+			Debit(gomock.Any(), testAccount.ID, value).Return(apperr.InsufficientBalance)
+		assert.ErrorIs(t, s.Debit(ctx, testAccount.ID, value), apperr.InsufficientBalance)
+	})
 
-	repo := mongodb.NewAccountMongoDB(db)
-	s := NewAccountService(repo)
+	t.Run("debit account with success", func(t *testing.T) {
+		t.Parallel()
+		mock := NewMockaccountRepository(ctrl)
+		s := NewAccountService(mock)
+		testAccount := account.TestAccount()
 
-	type args struct {
-		id    account.UserID
-		value int
-	}
+		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
 
-	type testCase struct {
-		name        string
-		args        args
-		expectedErr error
-	}
-	testAccount := account.TestAccount()
-	if err := s.CreateAccount(ctx, testAccount); err != nil {
-		t.Fatalf("failed to create test account: %v", err)
-	}
-
-	testCases := []testCase{
-		{
-			name:        "with positive value",
-			args:        args{id: testAccount.ID, value: 100},
-			expectedErr: nil,
-		},
-		{
-			name:        "with negative value",
-			args:        args{id: testAccount.ID, value: -100},
-			expectedErr: apperr.InvalidCreditValue,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			if err := s.Credit(ctx, tc.args.id, tc.args.value); !errors.Is(err, tc.expectedErr) {
-				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
-			}
-		})
-	}
+		err := s.CreateAccount(ctx, testAccount)
+		if err != nil {
+			t.Fatal(err)
+		}
+		value := uint(testAccount.Balance)
+		mock.EXPECT().
+			Debit(gomock.Any(), testAccount.ID, value).Return(nil)
+		assert.Nil(t, s.Debit(ctx, testAccount.ID, value), "should be no error")
+	})
 }
 
-func TestAccountService_Debit(t *testing.T) {
-	log.BuildLogger(log.TestLoggerConfig)
+func TestAccountService_Credit(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
-	db, teardown, err := mongodb.NewMongoDB(context.Background(), mongodb.TestDBConfig)
+	log.BuildLogger(log.TestLoggerConfig)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	if err != nil {
-		t.Fatalf("failed to connect to mongodb: %v", err)
-	}
-	defer func() {
-		if err := teardown(ctx); err != nil {
+	t.Run("credit account with success", func(t *testing.T) {
+		t.Parallel()
+		mock := NewMockaccountRepository(ctrl)
+		s := NewAccountService(mock)
+		testAccount := account.TestAccount()
+
+		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
+
+		err := s.CreateAccount(ctx, testAccount)
+		if err != nil {
 			t.Fatal(err)
 		}
-	}()
-
-	repo := mongodb.NewAccountMongoDB(db)
-	s := NewAccountService(repo)
-
-	type args struct {
-		id    account.UserID
-		value int
-	}
-
-	type testCase struct {
-		name        string
-		args        args
-		expectedErr error
-	}
-
-	testAccount := account.TestAccount()
-	if err := s.CreateAccount(ctx, testAccount); err != nil {
-		t.Fatalf("failed to create test account: %v", err)
-	}
-
-	testCases := []testCase{
-		{
-			name:        "with negative value",
-			args:        args{id: testAccount.ID, value: -21},
-			expectedErr: apperr.InvalidDebitValue,
-		},
-		{
-			name:        "insufficient balance case",
-			args:        args{id: testAccount.ID, value: testAccount.Balance + 1},
-			expectedErr: apperr.InsufficientBalance,
-		},
-		{
-			name:        "sufficient balance case",
-			args:        args{id: testAccount.ID, value: testAccount.Balance - 1},
-			expectedErr: nil,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			if err := s.Debit(ctx, tc.args.id, tc.args.value); !errors.Is(err, tc.expectedErr) {
-				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
-			}
-		})
-	}
+		value := uint(testAccount.Balance)
+		mock.EXPECT().
+			Credit(gomock.Any(), testAccount.ID, value).Return(nil)
+		assert.Nil(t, s.Credit(ctx, testAccount.ID, value), "should be no error")
+	})
 }
 
 func TestAccountService_CreateAccount(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	log.BuildLogger(log.TestLoggerConfig)
-	db, teardown, err := mongodb.NewMongoDB(context.Background(), mongodb.TestDBConfig)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	if err != nil {
-		t.Fatalf("failed to connect to mongodb: %v", err)
-	}
-	defer func() {
-		if err := teardown(ctx); err != nil {
-			t.Fatal(err)
-		}
-	}()
+	t.Run("create new account with success", func(t *testing.T) {
+		t.Parallel()
+		mock := NewMockaccountRepository(ctrl)
+		s := NewAccountService(mock)
+		testAccount := account.TestAccount()
 
-	repo := mongodb.NewAccountMongoDB(db)
-	s := NewAccountService(repo)
+		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
 
-	type testCase struct {
-		name        string
-		value       int
-		expectedErr error
-	}
+		assert.Nil(t, s.CreateAccount(ctx, testAccount), "should be no error")
+	})
 
-	testCases := []testCase{
-		{
-			name:        "with positive balance",
-			value:       100,
-			expectedErr: nil,
-		},
-	}
+	t.Run("create already registered account with fail", func(t *testing.T) {
+		t.Parallel()
+		mock := NewMockaccountRepository(ctrl)
+		s := NewAccountService(mock)
+		testAccount := account.TestAccount()
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			testAccount := account.TestAccount()
-			testAccount.Balance = tc.value
-			if err := s.CreateAccount(ctx, testAccount); !errors.Is(err, tc.expectedErr) {
-				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
-			}
-		})
-	}
+		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
+		_ = s.CreateAccount(ctx, testAccount)
+		mock.EXPECT().Create(gomock.Any(), testAccount).Return(apperr.AccountAlreadyExists)
+
+		assert.ErrorIs(t, s.CreateAccount(ctx, testAccount), apperr.AccountAlreadyExists)
+	})
 }

@@ -60,7 +60,7 @@ func (a *AccountMongoDB) FindByID(ctx context.Context, id t.UserID) (*t.Account,
 }
 
 // Credit credits account.
-func (a *AccountMongoDB) Credit(ctx context.Context, id t.UserID, value int) error {
+func (a *AccountMongoDB) Credit(ctx context.Context, id t.UserID, value uint) error {
 	accounts := a.db.Collection(accountsCollection)
 	filter := bson.D{{Key: "user_id", Value: id}}
 
@@ -73,7 +73,7 @@ func (a *AccountMongoDB) Credit(ctx context.Context, id t.UserID, value int) err
 }
 
 // Debit debits account.
-func (a *AccountMongoDB) Debit(ctx context.Context, id t.UserID, value int) error {
+func (a *AccountMongoDB) Debit(ctx context.Context, id t.UserID, value uint) error {
 
 	accounts := a.db.Collection(accountsCollection)
 
@@ -83,16 +83,16 @@ func (a *AccountMongoDB) Debit(ctx context.Context, id t.UserID, value int) erro
 	if err != nil {
 		return err
 	}
-	if (balance - value) < 0 {
+	if int(balance-value) < 0 {
 		return apperr.InsufficientBalance
 	}
-	var result = accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": -value}})
+	var result = accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": -int(value)}})
 	return result.Err()
 
 }
 
 // GetBalance get account balance.
-func (a *AccountMongoDB) GetBalance(ctx context.Context, id t.UserID) (int, error) {
+func (a *AccountMongoDB) GetBalance(ctx context.Context, id t.UserID) (uint, error) {
 	account, err := a.FindByID(ctx, id)
 	if err != nil {
 		return 0, err
