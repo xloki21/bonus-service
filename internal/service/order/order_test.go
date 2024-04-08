@@ -35,7 +35,8 @@ func TestNewOrderService_Register(t *testing.T) {
 
 		testOrder := order.TestOrder(100)
 		mock.EXPECT().Register(gomock.Any(), testOrder).Return(nil)
-		_ = s.Register(ctx, testOrder)
+		err := s.Register(ctx, testOrder)
+		assert.NoError(t, err)
 
 		mock.EXPECT().Register(gomock.Any(), testOrder).Return(apperr.OrderAlreadyRegistered)
 		assert.ErrorIs(t, s.Register(ctx, testOrder), apperr.OrderAlreadyRegistered)

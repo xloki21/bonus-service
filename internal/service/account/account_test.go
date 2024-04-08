@@ -29,7 +29,7 @@ func TestAccountService_Debit(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		value := uint(testAccount.Balance + 1)
+		value := testAccount.Balance + 1
 		mock.EXPECT().
 			Debit(gomock.Any(), testAccount.ID, value).Return(apperr.InsufficientBalance)
 		assert.ErrorIs(t, s.Debit(ctx, testAccount.ID, value), apperr.InsufficientBalance)
@@ -47,7 +47,7 @@ func TestAccountService_Debit(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		value := uint(testAccount.Balance)
+		value := testAccount.Balance
 		mock.EXPECT().
 			Debit(gomock.Any(), testAccount.ID, value).Return(nil)
 		assert.Nil(t, s.Debit(ctx, testAccount.ID, value), "should be no error")
@@ -70,10 +70,9 @@ func TestAccountService_Credit(t *testing.T) {
 		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
 
 		err := s.CreateAccount(ctx, testAccount)
-		if err != nil {
-			t.Fatal(err)
-		}
-		value := uint(testAccount.Balance)
+		assert.NoError(t, err)
+
+		value := testAccount.Balance
 		mock.EXPECT().
 			Credit(gomock.Any(), testAccount.ID, value).Return(nil)
 		assert.Nil(t, s.Credit(ctx, testAccount.ID, value), "should be no error")

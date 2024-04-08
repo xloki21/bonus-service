@@ -12,7 +12,7 @@ func main() {
 	cfg, err := config.InitConfigFromViper()
 
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	logger := log.BuildLogger(cfg.LoggerConfig)

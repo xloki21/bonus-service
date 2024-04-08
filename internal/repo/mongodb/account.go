@@ -77,17 +77,15 @@ func (a *AccountMongoDB) Debit(ctx context.Context, id t.UserID, value uint) err
 
 	accounts := a.db.Collection(accountsCollection)
 
-	filter := bson.D{{Key: "user_id", Value: id}}
-
-	balance, err := a.GetBalance(ctx, id)
-	if err != nil {
-		return err
-	}
-	if int(balance-value) < 0 {
-		return apperr.InsufficientBalance
+	filter := bson.D{
+		{Key: "user_id", Value: id},
+		{Key: "balance", Value: bson.M{"$gte": value}},
 	}
 	var result = accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": -int(value)}})
-	return result.Err()
+	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
+		return apperr.AccountNotFound
+	}
+	return nil
 
 }
 

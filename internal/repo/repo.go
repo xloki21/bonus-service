@@ -9,11 +9,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+//go:generate mockgen -destination=mocks/mocks.go -source=repo.go -package=mocks
 type Order interface {
 	Register(ctx context.Context, o order.Order) error
 }
 
-//go:generate mockgen -destination=mocks/mocks.go -source=repo.go -package=mocks
 type Account interface {
 	Create(context.Context, account.Account) error
 	Delete(context.Context, account.Account) error
