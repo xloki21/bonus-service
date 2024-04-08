@@ -83,19 +83,10 @@ func (a *AccountMongoDB) Debit(ctx context.Context, id t.UserID, value uint) err
 	}
 	var result = accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": -int(value)}})
 	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
-		return apperr.AccountNotFound
+		return apperr.InsufficientBalance
 	}
 	return nil
 
-}
-
-// GetBalance get account balance.
-func (a *AccountMongoDB) GetBalance(ctx context.Context, id t.UserID) (uint, error) {
-	account, err := a.FindByID(ctx, id)
-	if err != nil {
-		return 0, err
-	}
-	return account.Balance, nil
 }
 
 func NewAccountMongoDB(db *mongo.Database) *AccountMongoDB {

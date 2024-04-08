@@ -18,7 +18,6 @@ type Account interface {
 	Create(context.Context, account.Account) error
 	Delete(context.Context, account.Account) error
 	FindByID(context.Context, account.UserID) (*account.Account, error)
-	GetBalance(context.Context, account.UserID) (uint, error)
 	Credit(context.Context, account.UserID, uint) error
 	Debit(context.Context, account.UserID, uint) error
 }

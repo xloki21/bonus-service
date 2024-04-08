@@ -184,71 +184,6 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 	}
 }
 
-func TestAccountMongoDB_GetBalance(t *testing.T) {
-	ctx := context.Background()
-	db, teardown, err := NewMongoDB(context.Background(), TestDBConfig)
-
-	if err != nil {
-		t.Fatalf("failed to connect to mongodb: %v", err)
-	}
-	defer func() {
-		if err := teardown(ctx); err != nil {
-			t.Fatal(err)
-		}
-	}()
-
-	r := NewAccountMongoDB(db)
-
-	type args struct {
-		id account.UserID
-	}
-
-	type testCase struct {
-		name          string
-		args          args
-		precondition  func() error
-		expectedErr   error
-		expectedValue uint
-	}
-
-	testAccount := account.TestAccount()
-
-	testCases := []testCase{
-		{
-			name:        "unknown account id",
-			args:        args{id: account.UserID(uuid.NewString())},
-			expectedErr: apperr.AccountNotFound,
-		},
-		{
-			name: "existing account id",
-			precondition: func() error {
-				return r.Create(ctx, testAccount)
-			},
-			args:          args{id: testAccount.ID},
-			expectedErr:   nil,
-			expectedValue: testAccount.Balance,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			if tc.precondition != nil {
-				if err := tc.precondition(); err != nil {
-					t.Errorf("expected error %v, got %v", nil, err)
-				}
-			}
-			got, err := r.GetBalance(ctx, tc.args.id)
-			if !errors.Is(err, tc.expectedErr) {
-				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
-			}
-			if got != tc.expectedValue {
-				t.Errorf("expected value %d, got %d", tc.expectedValue, got)
-			}
-
-		})
-	}
-}
-
 func TestAccountMongoDB_Debit(t *testing.T) {
 	ctx := context.Background()
 	db, teardown, err := NewMongoDB(context.Background(), TestDBConfig)
@@ -283,7 +218,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 		{
 			name:        "unknown account id",
 			args:        args{id: account.UserID(uuid.NewString()), value: 100},
-			expectedErr: apperr.AccountNotFound,
+			expectedErr: apperr.InsufficientBalance,
 		},
 		{
 			name: "existing account with insufficient balance",
@@ -293,7 +228,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 			postcondition: func() error {
 				return r.Delete(ctx, testAccount)
 			},
-			args:        args{id: testAccount.ID, value: uint(testAccount.Balance + 1)},
+			args:        args{id: testAccount.ID, value: testAccount.Balance + 1},
 			expectedErr: apperr.InsufficientBalance,
 		},
 		{
@@ -304,7 +239,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 			postcondition: func() error {
 				return r.Delete(ctx, testAccount)
 			},
-			args:        args{id: testAccount.ID, value: uint(testAccount.Balance - 1)},
+			args:        args{id: testAccount.ID, value: testAccount.Balance - 1},
 			expectedErr: nil,
 		},
 	}
