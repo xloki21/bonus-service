@@ -145,21 +145,6 @@ func (mr *MockAccountMockRecorder) FindByID(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockAccount)(nil).FindByID), arg0, arg1)
 }
 
-// GetBalance mocks base method.
-func (m *MockAccount) GetBalance(arg0 context.Context, arg1 account.UserID) (uint, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBalance", arg0, arg1)
-	ret0, _ := ret[0].(uint)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetBalance indicates an expected call of GetBalance.
-func (mr *MockAccountMockRecorder) GetBalance(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBalance", reflect.TypeOf((*MockAccount)(nil).GetBalance), arg0, arg1)
-}
-
 // MockTransaction is a mock of Transaction interface.
 type MockTransaction struct {
 	ctrl     *gomock.Controller

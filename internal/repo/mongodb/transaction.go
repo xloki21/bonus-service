@@ -20,7 +20,7 @@ type TransactionMongoDB struct {
 
 func (t *TransactionMongoDB) GetOrderTransactions(ctx context.Context, order order.Order) ([]transaction.Transaction, error) {
 	transactions := t.db.Collection(transactionsCollection)
-	var opts = options.Find()
+	opts := options.Find()
 
 	ops := make([]transaction.Transaction, 0, len(order.Goods))
 	cursor, err := transactions.Find(ctx,
@@ -73,7 +73,7 @@ func (t *TransactionMongoDB) Update(ctx context.Context, tx *transaction.Transac
 // RewardAccounts used to update accounts balance.
 func (t *TransactionMongoDB) RewardAccounts(ctx context.Context, limit int64) error {
 	transactions := t.db.Collection(transactionsCollection)
-	var opts = options.Aggregate()
+	opts := options.Aggregate()
 	opts.SetBatchSize(int32(limit))
 	aggTransactions := make([]transaction.AggregatedTransaction, 0, limit)
 
@@ -151,7 +151,7 @@ func (t *TransactionMongoDB) RewardAccounts(ctx context.Context, limit int64) er
 // FindUnprocessed returns unprocessed transactions.
 func (t *TransactionMongoDB) FindUnprocessed(ctx context.Context, limit int64) ([]transaction.Transaction, error) {
 	transactions := t.db.Collection(transactionsCollection)
-	var opts = options.Find()
+	opts := options.Find()
 	opts.SetSort(bson.D{{Key: "registered_at", Value: 1}})
 	opts.SetLimit(limit)
 

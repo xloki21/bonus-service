@@ -18,7 +18,7 @@ type AccountMongoDB struct {
 func (a *AccountMongoDB) Create(ctx context.Context, account t.Account) error {
 	accounts := a.db.Collection(accountsCollection)
 	filter := bson.D{bson.E{Key: "user_id", Value: account.ID}}
-	var result = new(t.Account)
+	result := new(t.Account)
 
 	if err := accounts.FindOne(ctx, filter).Decode(result); err == nil {
 		return apperr.AccountAlreadyExists
@@ -51,7 +51,7 @@ func (a *AccountMongoDB) FindByID(ctx context.Context, id t.UserID) (*t.Account,
 
 	filter := bson.D{{Key: "user_id", Value: id}}
 
-	var result = new(t.Account)
+	result := new(t.Account)
 
 	if err := accounts.FindOne(ctx, filter).Decode(result); err != nil {
 		return nil, apperr.AccountNotFound
@@ -64,7 +64,7 @@ func (a *AccountMongoDB) Credit(ctx context.Context, id t.UserID, value uint) er
 	accounts := a.db.Collection(accountsCollection)
 	filter := bson.D{{Key: "user_id", Value: id}}
 
-	var result = accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": value}})
+	result := accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": value}})
 	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
 		return apperr.AccountNotFound
 	}
@@ -81,7 +81,7 @@ func (a *AccountMongoDB) Debit(ctx context.Context, id t.UserID, value uint) err
 		{Key: "user_id", Value: id},
 		{Key: "balance", Value: bson.M{"$gte": value}},
 	}
-	var result = accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": -int(value)}})
+	result := accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": -int(value)}})
 	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
 		return apperr.InsufficientBalance
 	}

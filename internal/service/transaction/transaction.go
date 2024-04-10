@@ -39,6 +39,7 @@ func (t *Service) Polling(ctx context.Context) error {
 	accrualServiceClient := accrual.New(t.cfg.AccrualService)
 	ticker := time.NewTicker(t.cfg.TransactionServiceConfig.PollingInterval)
 	defer ticker.Stop() // Stop the ticker so it can be garbage collected
+	batchSize := int64(t.cfg.TransactionServiceConfig.MaxTransactionsPerRequest)
 	for {
 		select {
 		case <-ctx.Done():
@@ -47,7 +48,7 @@ func (t *Service) Polling(ctx context.Context) error {
 		case <-ticker.C:
 			logger.Info("polling event triggered")
 			logger.Info("find unprocessed transactions...")
-			txs, err := t.repo.FindUnprocessed(ctx, int64(t.cfg.TransactionServiceConfig.MaxTransactionsPerRequest))
+			txs, err := t.repo.FindUnprocessed(ctx, batchSize)
 			if err != nil {
 				logger.Warnf("polling event error on find unprocessed transactions: %v", err)
 				continue
