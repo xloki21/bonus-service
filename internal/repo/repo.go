@@ -17,9 +17,9 @@ type Order interface {
 type Account interface {
 	Create(context.Context, account.Account) error
 	Delete(context.Context, account.Account) error
-	FindByID(context.Context, account.UserID) (*account.Account, error)
-	Credit(context.Context, account.UserID, uint) error
-	Debit(context.Context, account.UserID, uint) error
+	FindByID(context.Context, string) (*account.Account, error)
+	Credit(context.Context, string, uint) error
+	Debit(context.Context, string, uint) error
 }
 
 type Transaction interface {

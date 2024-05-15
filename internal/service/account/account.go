@@ -11,11 +11,11 @@ type Service struct {
 	accounts repo.Account
 }
 
-func (a *Service) Credit(ctx context.Context, id account.UserID, value uint) error {
+func (a *Service) Credit(ctx context.Context, id string, value uint) error {
 	return a.accounts.Credit(ctx, id, value)
 }
 
-func (a *Service) Debit(ctx context.Context, id account.UserID, value uint) error {
+func (a *Service) Debit(ctx context.Context, id string, value uint) error {
 	return a.accounts.Debit(ctx, id, value)
 }
 

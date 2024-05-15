@@ -47,7 +47,7 @@ func (a *AccountStorage) Delete(ctx context.Context, acc account.Account) error 
 }
 
 // FindByID finds account by user id.
-func (a *AccountStorage) FindByID(ctx context.Context, id account.UserID) (*account.Account, error) {
+func (a *AccountStorage) FindByID(ctx context.Context, id string) (*account.Account, error) {
 	accounts := a.collection(accountsCollection)
 
 	filter := bson.D{{Key: "user_id", Value: id}}
@@ -61,7 +61,7 @@ func (a *AccountStorage) FindByID(ctx context.Context, id account.UserID) (*acco
 }
 
 // Credit credits account.
-func (a *AccountStorage) Credit(ctx context.Context, id account.UserID, value uint) error {
+func (a *AccountStorage) Credit(ctx context.Context, id string, value uint) error {
 	accounts := a.collection(accountsCollection)
 	filter := bson.D{{Key: "user_id", Value: id}}
 
@@ -74,7 +74,7 @@ func (a *AccountStorage) Credit(ctx context.Context, id account.UserID, value ui
 }
 
 // Debit debits account.
-func (a *AccountStorage) Debit(ctx context.Context, id account.UserID, value uint) error {
+func (a *AccountStorage) Debit(ctx context.Context, id string, value uint) error {
 
 	accounts := a.collection(accountsCollection)
 

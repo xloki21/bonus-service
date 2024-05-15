@@ -8,7 +8,7 @@ import (
 
 func NewAccount() account.Account {
 	return account.Account{
-		ID:      account.UserID(uuid.NewString()),
+		ID:      uuid.NewString(),
 		Balance: uint(rand.Intn(2104)),
 	}
 }

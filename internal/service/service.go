@@ -17,8 +17,8 @@ type Order interface {
 
 type Account interface {
 	CreateAccount(context.Context, account.Account) error
-	Credit(context.Context, account.UserID, uint) error
-	Debit(context.Context, account.UserID, uint) error
+	Credit(context.Context, string, uint) error
+	Debit(context.Context, string, uint) error
 }
 
 type Transaction interface {

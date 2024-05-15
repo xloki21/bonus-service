@@ -84,7 +84,7 @@ func TestAccountMongoDB_FindByID(t *testing.T) {
 
 	r := NewAccountStorage(db)
 	type args struct {
-		id account.UserID
+		id string
 	}
 
 	type testCase struct {
@@ -99,7 +99,7 @@ func TestAccountMongoDB_FindByID(t *testing.T) {
 	testCases := []testCase{
 		{
 			name:        "missing account",
-			args:        args{id: account.UserID(uuid.NewString())},
+			args:        args{id: uuid.NewString()},
 			expectedErr: apperr.AccountNotFound,
 		},
 		{
@@ -142,7 +142,7 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 	r := NewAccountStorage(db)
 
 	type args struct {
-		id    account.UserID
+		id    string
 		value uint
 	}
 
@@ -158,7 +158,7 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 	testCases := []testCase{
 		{
 			name:        "unknown account id",
-			args:        args{id: account.UserID(uuid.NewString()), value: 100},
+			args:        args{id: uuid.NewString(), value: 100},
 			expectedErr: apperr.AccountNotFound,
 		},
 		{
@@ -201,7 +201,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 	r := NewAccountStorage(db)
 
 	type args struct {
-		id    account.UserID
+		id    string
 		value uint
 	}
 
@@ -218,7 +218,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 	testCases := []testCase{
 		{
 			name:        "unknown account id",
-			args:        args{id: account.UserID(uuid.NewString()), value: 100},
+			args:        args{id: uuid.NewString(), value: 100},
 			expectedErr: apperr.InsufficientBalance,
 		},
 		{
