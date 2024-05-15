@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/xloki21/bonus-service/config"
 	"github.com/xloki21/bonus-service/internal/apperr"
+	"github.com/xloki21/bonus-service/internal/client/accrual"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
 	"github.com/xloki21/bonus-service/internal/repo"
-	"github.com/xloki21/bonus-service/internal/service/accrual"
 	"github.com/xloki21/bonus-service/pkg/log"
 	"math"
 	"sync"
@@ -36,7 +36,7 @@ func (s *Service) Polling(ctx context.Context) error {
 	}
 	successfulRounds := 0
 	logger.Info("polling transactions...")
-	accrualServiceClient := accrual.New(s.cfg.AccrualService)
+	client := accrual.NewClient(s.cfg.AccrualService)
 	ticker := time.NewTicker(s.cfg.TransactionServiceConfig.PollingInterval)
 	defer ticker.Stop() // Stop the ticker so it can be garbage collected
 	batchSize := int64(s.cfg.TransactionServiceConfig.MaxTransactionsPerRequest)
@@ -65,7 +65,7 @@ func (s *Service) Polling(ctx context.Context) error {
 				wg.Add(1)
 				go func(wg *sync.WaitGroup, index int) {
 					defer wg.Done()
-					reward, err := accrualServiceClient.GetAccrual(ctx, &txs[index])
+					reward, err := client.GetAccrual(ctx, &txs[index])
 					if err != nil {
 						errsCh <- err
 						logger.Warnf("error during request to accrual service: %v", err)
@@ -91,8 +91,8 @@ func (s *Service) Polling(ctx context.Context) error {
 				if err != nil {
 					successfulRounds = 0
 					if errors.Is(err, apperr.AccrualServiceTooManyRequests) {
-						adjustedRPS := int(float32(accrualServiceClient.GetRPS()) * 0.95)
-						accrualServiceClient.AdjustRPS(adjustedRPS)
+						adjustedRPS := int(float32(client.GetRPS()) * 0.95)
+						client.AdjustRPS(adjustedRPS)
 						break
 					}
 				}
@@ -101,9 +101,9 @@ func (s *Service) Polling(ctx context.Context) error {
 			if successfulRounds > minSuccessfulRoundsToRestoreRPS {
 				// try to restore RPS after successful rounds
 				successfulRounds = minSuccessfulRoundsToRestoreRPS
-				adjustedRPS := int(float32(accrualServiceClient.GetRPS()) * 1.05)
+				adjustedRPS := int(float32(client.GetRPS()) * 1.05)
 				adjustedRPS = int(math.Min(float64(adjustedRPS), float64(maxRequestsPerSecond))) // cap
-				accrualServiceClient.AdjustRPS(adjustedRPS)
+				client.AdjustRPS(adjustedRPS)
 			}
 
 			logger.Info("rewarding accounts...")

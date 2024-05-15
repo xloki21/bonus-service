@@ -89,7 +89,7 @@ func (mr *MockAccountMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // Credit mocks base method.
-func (m *MockAccount) Credit(arg0 context.Context, arg1 account.UserID, arg2 uint) error {
+func (m *MockAccount) Credit(arg0 context.Context, arg1 string, arg2 uint) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Credit", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
@@ -103,7 +103,7 @@ func (mr *MockAccountMockRecorder) Credit(arg0, arg1, arg2 interface{}) *gomock.
 }
 
 // Debit mocks base method.
-func (m *MockAccount) Debit(arg0 context.Context, arg1 account.UserID, arg2 uint) error {
+func (m *MockAccount) Debit(arg0 context.Context, arg1 string, arg2 uint) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Debit", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
@@ -131,7 +131,7 @@ func (mr *MockAccountMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockAccount) FindByID(arg0 context.Context, arg1 account.UserID) (*account.Account, error) {
+func (m *MockAccount) FindByID(arg0 context.Context, arg1 string) (*account.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", arg0, arg1)
 	ret0, _ := ret[0].(*account.Account)
