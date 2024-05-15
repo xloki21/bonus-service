@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/faker"
+	"go.mongodb.org/mongo-driver/bson"
 	"testing"
 )
 
@@ -40,7 +41,8 @@ func TestTransactionMongoDB_FindUnprocessed(t *testing.T) {
 			name: "new order transactions: len(tx) > limit",
 			args: args{order: faker.NewOrder(1000), limit: 10},
 			postcondition: func() error {
-				return or.db.Collection(ordersCollection).Drop(ctx)
+				_, err := or.db.Collection(ordersCollection).DeleteMany(ctx, bson.M{})
+				return err
 			},
 			expectedErr: nil,
 		},
@@ -48,7 +50,8 @@ func TestTransactionMongoDB_FindUnprocessed(t *testing.T) {
 			name: "new order transactions: len(tx) < limit",
 			args: args{order: faker.NewOrder(1000), limit: 2000},
 			postcondition: func() error {
-				return or.db.Collection(ordersCollection).Drop(ctx)
+				_, err := or.db.Collection(ordersCollection).DeleteMany(ctx, bson.M{})
+				return err
 			},
 			expectedErr: nil,
 		},
