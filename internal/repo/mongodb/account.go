@@ -14,9 +14,13 @@ type AccountStorage struct {
 	db *mongo.Database
 }
 
+func (a *AccountStorage) collection(name string) *mongo.Collection {
+	return a.db.Collection(name)
+}
+
 // Create new account.
 func (a *AccountStorage) Create(ctx context.Context, acc account.Account) error {
-	accounts := a.db.Collection(accountsCollection)
+	accounts := a.collection(accountsCollection)
 
 	if _, err := accounts.InsertOne(ctx, acc); err != nil {
 		if mongo.IsDuplicateKeyError(err) {
@@ -29,7 +33,7 @@ func (a *AccountStorage) Create(ctx context.Context, acc account.Account) error 
 
 // Delete the account.
 func (a *AccountStorage) Delete(ctx context.Context, acc account.Account) error {
-	accounts := a.db.Collection(accountsCollection)
+	accounts := a.collection(accountsCollection)
 	filter := bson.D{{Key: "user_id", Value: acc.ID}}
 
 	opResult, err := accounts.DeleteOne(ctx, filter)
@@ -44,7 +48,7 @@ func (a *AccountStorage) Delete(ctx context.Context, acc account.Account) error 
 
 // FindByID finds account by user id.
 func (a *AccountStorage) FindByID(ctx context.Context, id account.UserID) (*account.Account, error) {
-	accounts := a.db.Collection(accountsCollection)
+	accounts := a.collection(accountsCollection)
 
 	filter := bson.D{{Key: "user_id", Value: id}}
 
@@ -58,7 +62,7 @@ func (a *AccountStorage) FindByID(ctx context.Context, id account.UserID) (*acco
 
 // Credit credits account.
 func (a *AccountStorage) Credit(ctx context.Context, id account.UserID, value uint) error {
-	accounts := a.db.Collection(accountsCollection)
+	accounts := a.collection(accountsCollection)
 	filter := bson.D{{Key: "user_id", Value: id}}
 
 	result := accounts.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"balance": value}})
@@ -66,12 +70,13 @@ func (a *AccountStorage) Credit(ctx context.Context, id account.UserID, value ui
 		return apperr.AccountNotFound
 	}
 	return result.Err()
+	//return fmt.Errorf("can't credit account: %w", result.Err())
 }
 
 // Debit debits account.
 func (a *AccountStorage) Debit(ctx context.Context, id account.UserID, value uint) error {
 
-	accounts := a.db.Collection(accountsCollection)
+	accounts := a.collection(accountsCollection)
 
 	filter := bson.D{
 		{Key: "user_id", Value: id},

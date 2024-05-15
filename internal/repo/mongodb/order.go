@@ -18,10 +18,14 @@ func NewOrderStorage(db *mongo.Database) *OrderStorage {
 	return &OrderStorage{db: db}
 }
 
+func (o *OrderStorage) collection(name string) *mongo.Collection {
+	return o.db.Collection(name)
+}
+
 // Register order to repository and create transactions.
 func (o *OrderStorage) Register(ctx context.Context, order t.Order) error {
-	orders := o.db.Collection(ordersCollection)
-	transactions := o.db.Collection(transactionsCollection)
+	orders := o.collection(ordersCollection)
+	transactions := o.collection(transactionsCollection)
 
 	// insert docs as single transaction
 	_, err := o.Run(ctx, func(ctx context.Context) (interface{}, error) {

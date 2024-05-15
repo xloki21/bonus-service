@@ -2,6 +2,7 @@ package v1
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/xloki21/bonus-service/internal/apperr"
@@ -23,7 +24,7 @@ func (h *Handler) RegisterAccount(ctx *gin.Context) {
 
 	request := &registerAccountRequest{}
 	if err := ctx.ShouldBindJSON(request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("bad request: %w", err).Error()})
 		return
 	}
 
@@ -33,7 +34,7 @@ func (h *Handler) RegisterAccount(ctx *gin.Context) {
 	}
 
 	if err := h.services.Account.CreateAccount(ctx, newAccount); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -44,17 +45,17 @@ func (h *Handler) DecreaseBalance(ctx *gin.Context) {
 
 	request := new(decreaseBalanceRequest)
 	if err := ctx.ShouldBindJSON(request); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("bad request: %w", err).Error()})
 		return
 	}
 
 	err := h.services.Account.Debit(ctx, request.UserId, request.Sum)
 	if err != nil {
 		if errors.Is(err, apperr.InsufficientBalance) {
-			ctx.JSON(http.StatusPaymentRequired, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusPaymentRequired, gin.H{"error": apperr.InsufficientBalance.Error()})
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "ok"})

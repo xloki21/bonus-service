@@ -13,13 +13,13 @@ import (
 )
 
 type Service struct {
-	Config config.AccrualServiceConfig
+	config config.AccrualServiceConfig
 	client *httppc.Client
 }
 
 func (a *Service) GetAccrual(ctx context.Context, tx *transaction.Transaction) (uint, error) {
 	urlString := fmt.Sprintf("%s/info?user=%s&good=%s&timestamp=%d",
-		a.Config.Endpoint, tx.UserID, tx.GoodID, tx.Timestamp)
+		a.config.Endpoint, tx.UserID, tx.GoodID, tx.Timestamp)
 
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, urlString, nil)
 	if err != nil {
@@ -55,18 +55,22 @@ func (a *Service) GetAccrual(ctx context.Context, tx *transaction.Transaction) (
 }
 
 func (a *Service) AdjustRPS(RPS int) {
-	a.Config.RPS = RPS
-	a.client = httppc.New(a.Config.MaxPoolSize, RPS)
+	a.config.RPS = RPS
+	a.client = httppc.New(a.config.MaxPoolSize, RPS)
+}
+
+func (a *Service) GetRPS() int {
+	return a.config.RPS
 }
 
 func (a *Service) AdjustMaxPoolSize(MaxPoolSize int) {
-	a.Config.MaxPoolSize = MaxPoolSize
-	a.client = httppc.New(a.Config.MaxPoolSize, MaxPoolSize)
+	a.config.MaxPoolSize = MaxPoolSize
+	a.client = httppc.New(a.config.MaxPoolSize, MaxPoolSize)
 }
 
 func New(config config.AccrualServiceConfig) *Service {
 	return &Service{
-		Config: config,
+		config: config,
 		client: httppc.New(config.MaxPoolSize, config.RPS),
 	}
 }

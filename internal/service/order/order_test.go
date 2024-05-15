@@ -24,7 +24,12 @@ func TestNewOrderService_Register(t *testing.T) {
 		s := NewOrderService(mock)
 
 		testOrder := faker.NewOrder(100)
-		mock.EXPECT().Register(gomock.Any(), testOrder).Return(nil)
+
+		mock.
+			EXPECT().
+			Register(gomock.Any(), gomock.Eq(testOrder)).
+			Return(nil)
+
 		assert.Nil(t, s.Register(ctx, testOrder), "Should be no error")
 	})
 
@@ -34,11 +39,19 @@ func TestNewOrderService_Register(t *testing.T) {
 		s := NewOrderService(mock)
 
 		testOrder := faker.NewOrder(100)
-		mock.EXPECT().Register(gomock.Any(), testOrder).Return(nil)
+		mock.
+			EXPECT().
+			Register(gomock.Any(), gomock.Eq(testOrder)).
+			Return(nil)
+
 		err := s.Register(ctx, testOrder)
 		assert.NoError(t, err)
 
-		mock.EXPECT().Register(gomock.Any(), testOrder).Return(apperr.OrderAlreadyRegistered)
+		mock.
+			EXPECT().
+			Register(gomock.Any(), gomock.Eq(testOrder)).
+			Return(apperr.OrderAlreadyRegistered)
+
 		assert.ErrorIs(t, s.Register(ctx, testOrder), apperr.OrderAlreadyRegistered)
 	})
 

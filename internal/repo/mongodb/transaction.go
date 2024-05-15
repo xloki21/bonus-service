@@ -18,8 +18,12 @@ type TransactionStorage struct {
 	db *mongo.Database
 }
 
+func (t *TransactionStorage) collection(name string) *mongo.Collection {
+	return t.db.Collection(name)
+}
+
 func (t *TransactionStorage) GetOrderTransactions(ctx context.Context, order order.Order) ([]transaction.Transaction, error) {
-	transactions := t.db.Collection(transactionsCollection)
+	transactions := t.collection(transactionsCollection)
 	opts := options.Find()
 
 	ops := make([]transaction.Transaction, 0, len(order.Goods))
@@ -63,7 +67,7 @@ func (t *TransactionStorage) run(ctx context.Context, f func(ctx context.Context
 
 // Update transaction status and reward.
 func (t *TransactionStorage) Update(ctx context.Context, tx *transaction.Transaction) error {
-	transactions := t.db.Collection(transactionsCollection)
+	transactions := t.collection(transactionsCollection)
 	filter := bson.M{"_id": tx.ID.(primitive.ObjectID)}
 	update := bson.M{"$set": bson.M{"status": tx.Status, "reward": tx.Reward, "completed_at": tx.CompletedAt}}
 	_, err := transactions.UpdateOne(ctx, filter, update)
@@ -72,7 +76,7 @@ func (t *TransactionStorage) Update(ctx context.Context, tx *transaction.Transac
 
 // RewardAccounts used to update accounts balance.
 func (t *TransactionStorage) RewardAccounts(ctx context.Context, limit int64) error {
-	transactions := t.db.Collection(transactionsCollection)
+	transactions := t.collection(transactionsCollection)
 	opts := options.Aggregate()
 	opts.SetBatchSize(int32(limit))
 	aggTransactions := make([]transaction.AggregatedTransaction, 0, limit)
@@ -113,7 +117,7 @@ func (t *TransactionStorage) RewardAccounts(ctx context.Context, limit int64) er
 	}
 
 	// Update accounts balances
-	accounts := t.db.Collection(accountsCollection)
+	accounts := t.collection(accountsCollection)
 	_, err = t.run(ctx, func(ctx context.Context) (interface{}, error) {
 		for _, tx := range aggTransactions {
 			filter := bson.D{{Key: "user_id", Value: tx.UserID}}
@@ -150,7 +154,7 @@ func (t *TransactionStorage) RewardAccounts(ctx context.Context, limit int64) er
 
 // FindUnprocessed returns unprocessed transactions.
 func (t *TransactionStorage) FindUnprocessed(ctx context.Context, limit int64) ([]transaction.Transaction, error) {
-	transactions := t.db.Collection(transactionsCollection)
+	transactions := t.collection(transactionsCollection)
 	opts := options.Find()
 	opts.SetSort(bson.D{{Key: "registered_at", Value: 1}})
 	opts.SetLimit(limit)
