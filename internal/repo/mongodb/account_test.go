@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
+	"github.com/xloki21/bonus-service/internal/faker"
 	"testing"
 )
 
@@ -22,7 +23,7 @@ func TestAccountMongoDB_Create(t *testing.T) {
 		}
 	}()
 
-	r := NewAccountMongoDB(db)
+	r := NewAccountStorage(db)
 
 	type args struct {
 		account account.Account
@@ -35,12 +36,12 @@ func TestAccountMongoDB_Create(t *testing.T) {
 		expectedErr  error
 	}
 
-	testAccount := account.TestAccount()
+	testAccount := faker.NewAccount()
 
 	testCases := []testCase{
 		{
 			name:        "regular account",
-			args:        args{account: account.TestAccount()},
+			args:        args{account: faker.NewAccount()},
 			expectedErr: nil,
 		},
 		{
@@ -81,7 +82,7 @@ func TestAccountMongoDB_FindByID(t *testing.T) {
 		}
 	}()
 
-	r := NewAccountMongoDB(db)
+	r := NewAccountStorage(db)
 	type args struct {
 		id account.UserID
 	}
@@ -93,7 +94,7 @@ func TestAccountMongoDB_FindByID(t *testing.T) {
 		expectedErr  error
 	}
 
-	testAccount := account.TestAccount()
+	testAccount := faker.NewAccount()
 
 	testCases := []testCase{
 		{
@@ -138,7 +139,7 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 		}
 	}()
 
-	r := NewAccountMongoDB(db)
+	r := NewAccountStorage(db)
 
 	type args struct {
 		id    account.UserID
@@ -152,7 +153,7 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 		expectedErr  error
 	}
 
-	testAccount := account.TestAccount()
+	testAccount := faker.NewAccount()
 
 	testCases := []testCase{
 		{
@@ -197,7 +198,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 		}
 	}()
 
-	r := NewAccountMongoDB(db)
+	r := NewAccountStorage(db)
 
 	type args struct {
 		id    account.UserID
@@ -212,7 +213,7 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 		expectedErr   error
 	}
 
-	testAccount := account.TestAccount()
+	testAccount := faker.NewAccount()
 
 	testCases := []testCase{
 		{

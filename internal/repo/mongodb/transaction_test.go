@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"github.com/xloki21/bonus-service/internal/entity/order"
+	"github.com/xloki21/bonus-service/internal/faker"
 	"testing"
 )
 
@@ -19,8 +20,8 @@ func TestTransactionMongoDB_FindUnprocessed(t *testing.T) {
 		}
 	}()
 
-	or := NewOrderMongoDB(db)
-	tr := NewTransactionMongoDB(db)
+	or := NewOrderStorage(db)
+	tr := NewTransactionStorage(db)
 	type args struct {
 		order order.Order
 		limit int64
@@ -37,7 +38,7 @@ func TestTransactionMongoDB_FindUnprocessed(t *testing.T) {
 	testCases := []testCase{
 		{
 			name: "new order transactions: len(tx) > limit",
-			args: args{order: order.TestOrder(1000), limit: 10},
+			args: args{order: faker.NewOrder(1000), limit: 10},
 			postcondition: func() error {
 				return or.db.Collection(ordersCollection).Drop(ctx)
 			},
@@ -45,7 +46,7 @@ func TestTransactionMongoDB_FindUnprocessed(t *testing.T) {
 		},
 		{
 			name: "new order transactions: len(tx) < limit",
-			args: args{order: order.TestOrder(1000), limit: 2000},
+			args: args{order: faker.NewOrder(1000), limit: 2000},
 			postcondition: func() error {
 				return or.db.Collection(ordersCollection).Drop(ctx)
 			},

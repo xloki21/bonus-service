@@ -6,37 +6,32 @@ import (
 	"github.com/xloki21/bonus-service/internal/apperr"
 	t "github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
 
-type OrderMongoDB struct {
+type OrderStorage struct {
 	db *mongo.Database
 }
 
-func NewOrderMongoDB(db *mongo.Database) *OrderMongoDB {
-	return &OrderMongoDB{db: db}
+func NewOrderStorage(db *mongo.Database) *OrderStorage {
+	return &OrderStorage{db: db}
 }
 
 // Register order to repository and create transactions.
-func (o *OrderMongoDB) Register(ctx context.Context, order t.Order) error {
+func (o *OrderStorage) Register(ctx context.Context, order t.Order) error {
 	orders := o.db.Collection(ordersCollection)
 	transactions := o.db.Collection(transactionsCollection)
-	filter := bson.D{
-		{Key: "user_id", Value: order.UserID},
-		{Key: "timestamp", Value: order.Timestamp},
-	}
-	var result t.Order
-
-	if err := orders.FindOne(ctx, filter).Decode(&result); err == nil {
-		return apperr.OrderAlreadyRegistered
-	}
 
 	// insert docs as single transaction
 	_, err := o.Run(ctx, func(ctx context.Context) (interface{}, error) {
 		// insert order into orders collection
 		if _, err := orders.InsertOne(ctx, order); err != nil {
+
+			if mongo.IsDuplicateKeyError(err) {
+				return nil, apperr.OrderAlreadyRegistered
+			}
+
 			return nil, fmt.Errorf("order registration failed: %w", err)
 		}
 
@@ -67,7 +62,7 @@ func (o *OrderMongoDB) Register(ctx context.Context, order t.Order) error {
 	return nil
 }
 
-func (o *OrderMongoDB) Run(ctx context.Context, f func(ctx context.Context) (interface{}, error)) (interface{}, error) {
+func (o *OrderStorage) Run(ctx context.Context, f func(ctx context.Context) (interface{}, error)) (interface{}, error) {
 	session, err := o.db.Client().StartSession()
 	if err != nil {
 		return nil, err

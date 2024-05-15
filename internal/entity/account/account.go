@@ -2,7 +2,6 @@ package account
 
 import (
 	"github.com/google/uuid"
-	"math/rand"
 )
 
 // UserID UUIDv4 string user identifier.
@@ -28,11 +27,4 @@ func (u *Account) Validate() error {
 	}
 
 	return nil
-}
-
-func TestAccount() Account {
-	return Account{
-		ID:      UserID(uuid.NewString()),
-		Balance: uint(rand.Intn(2104)),
-	}
 }

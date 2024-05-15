@@ -10,17 +10,6 @@ import (
 
 // TESTAccrual test external service handler. If "OK" returns random int from [0, 10000) as response.
 func (h *Handler) TESTAccrual(ctx *gin.Context) {
-	//ts, err := strconv.Atoi(ctx.Query("timestamp"))
-	//if err != nil {
-	//	return
-	//}
-	//_ = transaction.Transaction{
-	//	UserID:       account.UserID(ctx.Query("user_id")),
-	//	GoodID:       order.GoodID(ctx.Query("good_id")),
-	//	Status:       transaction.UNPROCESSED,
-	//	Timestamp:    int64(ts),
-	//	RegisteredAt: time.Now().Unix(),
-	//}
 
 	// simulate accrual not found yet
 	condition := rand.Intn(100)

@@ -14,11 +14,11 @@ import (
 	"time"
 )
 
-type TransactionMongoDB struct {
+type TransactionStorage struct {
 	db *mongo.Database
 }
 
-func (t *TransactionMongoDB) GetOrderTransactions(ctx context.Context, order order.Order) ([]transaction.Transaction, error) {
+func (t *TransactionStorage) GetOrderTransactions(ctx context.Context, order order.Order) ([]transaction.Transaction, error) {
 	transactions := t.db.Collection(transactionsCollection)
 	opts := options.Find()
 
@@ -44,7 +44,7 @@ func (t *TransactionMongoDB) GetOrderTransactions(ctx context.Context, order ord
 	return ops, nil
 }
 
-func (t *TransactionMongoDB) run(ctx context.Context, f func(ctx context.Context) (interface{}, error)) (interface{}, error) {
+func (t *TransactionStorage) run(ctx context.Context, f func(ctx context.Context) (interface{}, error)) (interface{}, error) {
 	session, err := t.db.Client().StartSession()
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (t *TransactionMongoDB) run(ctx context.Context, f func(ctx context.Context
 }
 
 // Update transaction status and reward.
-func (t *TransactionMongoDB) Update(ctx context.Context, tx *transaction.Transaction) error {
+func (t *TransactionStorage) Update(ctx context.Context, tx *transaction.Transaction) error {
 	transactions := t.db.Collection(transactionsCollection)
 	filter := bson.M{"_id": tx.ID.(primitive.ObjectID)}
 	update := bson.M{"$set": bson.M{"status": tx.Status, "reward": tx.Reward, "completed_at": tx.CompletedAt}}
@@ -71,7 +71,7 @@ func (t *TransactionMongoDB) Update(ctx context.Context, tx *transaction.Transac
 }
 
 // RewardAccounts used to update accounts balance.
-func (t *TransactionMongoDB) RewardAccounts(ctx context.Context, limit int64) error {
+func (t *TransactionStorage) RewardAccounts(ctx context.Context, limit int64) error {
 	transactions := t.db.Collection(transactionsCollection)
 	opts := options.Aggregate()
 	opts.SetBatchSize(int32(limit))
@@ -149,7 +149,7 @@ func (t *TransactionMongoDB) RewardAccounts(ctx context.Context, limit int64) er
 }
 
 // FindUnprocessed returns unprocessed transactions.
-func (t *TransactionMongoDB) FindUnprocessed(ctx context.Context, limit int64) ([]transaction.Transaction, error) {
+func (t *TransactionStorage) FindUnprocessed(ctx context.Context, limit int64) ([]transaction.Transaction, error) {
 	transactions := t.db.Collection(transactionsCollection)
 	opts := options.Find()
 	opts.SetSort(bson.D{{Key: "registered_at", Value: 1}})
@@ -175,6 +175,6 @@ func (t *TransactionMongoDB) FindUnprocessed(ctx context.Context, limit int64) (
 	return ops, nil
 }
 
-func NewTransactionMongoDB(db *mongo.Database) *TransactionMongoDB {
-	return &TransactionMongoDB{db: db}
+func NewTransactionStorage(db *mongo.Database) *TransactionStorage {
+	return &TransactionStorage{db: db}
 }

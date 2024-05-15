@@ -37,8 +37,8 @@ type Repository struct {
 
 func NewRepositoryMongoDB(db *mongo.Database) *Repository {
 	return &Repository{
-		Account:     mongodb.NewAccountMongoDB(db),
-		Order:       mongodb.NewOrderMongoDB(db),
-		Transaction: mongodb.NewTransactionMongoDB(db),
+		Account:     mongodb.NewAccountStorage(db),
+		Order:       mongodb.NewOrderStorage(db),
+		Transaction: mongodb.NewTransactionStorage(db),
 	}
 }

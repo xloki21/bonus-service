@@ -5,35 +5,32 @@ import (
 	"errors"
 	"fmt"
 	"github.com/xloki21/bonus-service/internal/apperr"
-	t "github.com/xloki21/bonus-service/internal/entity/account"
+	"github.com/xloki21/bonus-service/internal/entity/account"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type AccountMongoDB struct {
+type AccountStorage struct {
 	db *mongo.Database
 }
 
 // Create new account.
-func (a *AccountMongoDB) Create(ctx context.Context, account t.Account) error {
+func (a *AccountStorage) Create(ctx context.Context, acc account.Account) error {
 	accounts := a.db.Collection(accountsCollection)
-	filter := bson.D{bson.E{Key: "user_id", Value: account.ID}}
-	result := new(t.Account)
 
-	if err := accounts.FindOne(ctx, filter).Decode(result); err == nil {
-		return apperr.AccountAlreadyExists
-	}
-
-	if _, err := accounts.InsertOne(ctx, account); err != nil {
+	if _, err := accounts.InsertOne(ctx, acc); err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return apperr.AccountAlreadyExists
+		}
 		return fmt.Errorf("can't create account: %w", err)
 	}
 	return nil
 }
 
 // Delete the account.
-func (a *AccountMongoDB) Delete(ctx context.Context, account t.Account) error {
+func (a *AccountStorage) Delete(ctx context.Context, acc account.Account) error {
 	accounts := a.db.Collection(accountsCollection)
-	filter := bson.D{{Key: "user_id", Value: account.ID}}
+	filter := bson.D{{Key: "user_id", Value: acc.ID}}
 
 	opResult, err := accounts.DeleteOne(ctx, filter)
 	if err != nil {
@@ -46,12 +43,12 @@ func (a *AccountMongoDB) Delete(ctx context.Context, account t.Account) error {
 }
 
 // FindByID finds account by user id.
-func (a *AccountMongoDB) FindByID(ctx context.Context, id t.UserID) (*t.Account, error) {
+func (a *AccountStorage) FindByID(ctx context.Context, id account.UserID) (*account.Account, error) {
 	accounts := a.db.Collection(accountsCollection)
 
 	filter := bson.D{{Key: "user_id", Value: id}}
 
-	result := new(t.Account)
+	result := &account.Account{}
 
 	if err := accounts.FindOne(ctx, filter).Decode(result); err != nil {
 		return nil, apperr.AccountNotFound
@@ -60,7 +57,7 @@ func (a *AccountMongoDB) FindByID(ctx context.Context, id t.UserID) (*t.Account,
 }
 
 // Credit credits account.
-func (a *AccountMongoDB) Credit(ctx context.Context, id t.UserID, value uint) error {
+func (a *AccountStorage) Credit(ctx context.Context, id account.UserID, value uint) error {
 	accounts := a.db.Collection(accountsCollection)
 	filter := bson.D{{Key: "user_id", Value: id}}
 
@@ -68,12 +65,11 @@ func (a *AccountMongoDB) Credit(ctx context.Context, id t.UserID, value uint) er
 	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
 		return apperr.AccountNotFound
 	}
-
 	return result.Err()
 }
 
 // Debit debits account.
-func (a *AccountMongoDB) Debit(ctx context.Context, id t.UserID, value uint) error {
+func (a *AccountStorage) Debit(ctx context.Context, id account.UserID, value uint) error {
 
 	accounts := a.db.Collection(accountsCollection)
 
@@ -89,6 +85,6 @@ func (a *AccountMongoDB) Debit(ctx context.Context, id t.UserID, value uint) err
 
 }
 
-func NewAccountMongoDB(db *mongo.Database) *AccountMongoDB {
-	return &AccountMongoDB{db: db}
+func NewAccountStorage(db *mongo.Database) *AccountStorage {
+	return &AccountStorage{db: db}
 }

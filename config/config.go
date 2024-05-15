@@ -30,7 +30,7 @@ type LoggerConfig struct {
 
 type AppConfig struct {
 	Mode                     string                   `mapstructure:"mode"`
-	Server                   *Server                  `mapstructure:"server"`
+	Server                   Server                   `mapstructure:"server"`
 	DB                       mongodb.Config           `mapstructure:"store"`
 	AccrualService           AccrualServiceConfig     `mapstructure:"accrual-service"`
 	TransactionServiceConfig TransactionServiceConfig `mapstructure:"transaction-service"`

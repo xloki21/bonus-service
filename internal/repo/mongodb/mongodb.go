@@ -54,7 +54,7 @@ func NewMongoDB(ctx context.Context, cfg Config) (*mongo.Database, func(ctx cont
 			return err
 		}
 		for _, collName := range collNames {
-			if err := client.Database(cfg.DBName).Collection(collName).Drop(ctx); err != nil {
+			if _, err := client.Database(cfg.DBName).Collection(collName).DeleteMany(ctx, bson.M{}); err != nil {
 				return err
 			}
 		}

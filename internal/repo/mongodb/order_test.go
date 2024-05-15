@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/order"
+	"github.com/xloki21/bonus-service/internal/faker"
 	"go.mongodb.org/mongo-driver/bson"
 	"math/rand"
 	"testing"
@@ -23,8 +24,8 @@ func TestOrderMongoDB_Register(t *testing.T) {
 		}
 	}()
 
-	or := NewOrderMongoDB(db)
-	tr := NewTransactionMongoDB(db)
+	or := NewOrderStorage(db)
+	tr := NewTransactionStorage(db)
 	type args struct {
 		order order.Order
 	}
@@ -37,18 +38,18 @@ func TestOrderMongoDB_Register(t *testing.T) {
 		expectedErr   error
 	}
 
-	testOrder := order.TestOrder(rand.Intn(1000) + 1)
+	testOrder := faker.NewOrder(rand.Intn(1000) + 1)
 
 	testCases := []testCase{
 		{
 			name:        "new order",
-			args:        args{order: order.TestOrder(10)},
+			args:        args{order: faker.NewOrder(10)},
 			expectedErr: nil,
 		},
 		{
 			name: "already registered order",
 			precondition: func() error {
-				if err := or.db.Collection(ordersCollection).Drop(ctx); err != nil {
+				if _, err := or.db.Collection(ordersCollection).DeleteMany(ctx, bson.M{}); err != nil {
 					return err
 				}
 				return or.Register(ctx, testOrder)

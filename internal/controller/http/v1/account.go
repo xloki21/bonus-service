@@ -21,19 +21,15 @@ type registerAccountRequest struct {
 // RegisterAccount register a new account with custom balance.
 func (h *Handler) RegisterAccount(ctx *gin.Context) {
 
-	request := new(registerAccountRequest)
+	request := &registerAccountRequest{}
 	if err := ctx.ShouldBindJSON(request); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	newAccount := account.Account{
 		ID:      account.UserID(uuid.NewString()),
 		Balance: request.Balance,
-	}
-	if err := newAccount.Validate(); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": apperr.AccountInvalidBalance})
-		return
 	}
 
 	if err := h.services.Account.CreateAccount(ctx, newAccount); err != nil {

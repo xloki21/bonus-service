@@ -41,22 +41,21 @@ func New(cfg config.AppConfig) (*Application, error) {
 	}, nil
 }
 
-func (a *Application) Run(ctx context.Context) error {
-	logger, err := log.GetLogger()
+func (a *Application) Run(ctx context.Context) (err error) {
+	var logger log.Logger
+	logger, err = log.GetLogger()
 	if err != nil {
 		return err
 	}
 	logger.Info("Application started")
 	defer func() {
-		if err := a.teardown(ctx); err != nil {
-			panic(err)
-		}
+		err = a.teardown(ctx)
 	}()
 
 	errCh := make(chan error, 1)
 
 	go func() {
-		err := a.services.Transaction.Polling(ctx)
+		err = a.services.Transaction.Polling(ctx)
 		if err != nil {
 			return
 		}
@@ -64,7 +63,7 @@ func (a *Application) Run(ctx context.Context) error {
 
 	handler := v1.NewHandler(a.services)
 	go func() {
-		if err := a.server.Run(a.cfg.Server.Address, handler.ApiV1(a.cfg.Mode)); err != nil {
+		if err = a.server.Run(a.cfg.Server.Address, handler.ApiV1(a.cfg.Mode)); err != nil {
 			if !errors.Is(err, http.ErrServerClosed) {
 				errCh <- err
 			}
@@ -78,11 +77,9 @@ func (a *Application) Run(ctx context.Context) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
-	case err := <-errCh:
-		//a.logger.Info("Server shutdown signal received")
+	case err = <-errCh:
 		return err
 	case <-quit:
-		//a.logger.Info("Gracefully shutting down...")
 		return nil
 	}
 }

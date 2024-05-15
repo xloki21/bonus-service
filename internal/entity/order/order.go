@@ -4,7 +4,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
-	"time"
 )
 
 const MaxOrderGoodsAmount = 100
@@ -47,16 +46,4 @@ func (o Order) Validate() error {
 		uniques[good] = true
 	}
 	return nil
-}
-
-func TestOrder(goodsAmount int) Order {
-	goods := make([]GoodID, 0, goodsAmount)
-	for i := 0; i < goodsAmount; i++ {
-		goods = append(goods, GoodID(uuid.NewString()))
-	}
-	return Order{
-		UserID:    account.UserID(uuid.NewString()),
-		Goods:     goods,
-		Timestamp: time.Now().Unix(),
-	}
 }

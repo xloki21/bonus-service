@@ -5,7 +5,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/xloki21/bonus-service/internal/apperr"
-	"github.com/xloki21/bonus-service/internal/entity/account"
+	"github.com/xloki21/bonus-service/internal/faker"
 	"github.com/xloki21/bonus-service/internal/repo/mocks"
 	"github.com/xloki21/bonus-service/pkg/log"
 	"testing"
@@ -22,7 +22,7 @@ func TestAccountService_Debit(t *testing.T) {
 		t.Parallel()
 		mock := mocks.NewMockAccount(ctrl)
 		s := NewAccountService(mock)
-		testAccount := account.TestAccount()
+		testAccount := faker.NewAccount()
 
 		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
 		err := s.CreateAccount(ctx, testAccount)
@@ -39,7 +39,7 @@ func TestAccountService_Debit(t *testing.T) {
 		t.Parallel()
 		mock := mocks.NewMockAccount(ctrl)
 		s := NewAccountService(mock)
-		testAccount := account.TestAccount()
+		testAccount := faker.NewAccount()
 
 		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
 
@@ -65,7 +65,7 @@ func TestAccountService_Credit(t *testing.T) {
 		t.Parallel()
 		mock := mocks.NewMockAccount(ctrl)
 		s := NewAccountService(mock)
-		testAccount := account.TestAccount()
+		testAccount := faker.NewAccount()
 
 		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
 
@@ -90,7 +90,7 @@ func TestAccountService_CreateAccount(t *testing.T) {
 		t.Parallel()
 		mock := mocks.NewMockAccount(ctrl)
 		s := NewAccountService(mock)
-		testAccount := account.TestAccount()
+		testAccount := faker.NewAccount()
 
 		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
 
@@ -101,7 +101,7 @@ func TestAccountService_CreateAccount(t *testing.T) {
 		t.Parallel()
 		mock := mocks.NewMockAccount(ctrl)
 		s := NewAccountService(mock)
-		testAccount := account.TestAccount()
+		testAccount := faker.NewAccount()
 
 		mock.EXPECT().Create(gomock.Any(), testAccount).Return(nil)
 		_ = s.CreateAccount(ctx, testAccount)

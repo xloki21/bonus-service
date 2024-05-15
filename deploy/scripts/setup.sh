@@ -28,6 +28,7 @@ appdb.createCollection('orders');
 appdb.createCollection('transactions');
 
 appdb.accounts.createIndex({"user_id":1}, {"unique":true})
+appdb.orders.createIndex({"user_id":1}, {"unique":true})
 appdb.transactions.createIndex({"timestamp":1}, {"registered_at":1})
 
 appdb_test.createCollection('accounts');
@@ -35,6 +36,8 @@ appdb_test.createCollection('orders');
 appdb_test.createCollection('transactions');
 
 appdb_test.accounts.createIndex({"user_id":1}, {"unique":true})
+appdb_test.orders.createIndex({"user_id":1}, {"unique":true})
+
 appdb_test.transactions.createIndex({"timestamp":1}, {"registered_at":1})
 
 var config = {
