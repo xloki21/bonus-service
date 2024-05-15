@@ -11,8 +11,8 @@ import (
 )
 
 type decreaseBalanceRequest struct {
-	UserId account.UserID `json:"user_id" binding:"required"`
-	Sum    uint           `json:"sum" binding:"required"`
+	UserId string `json:"user_id" binding:"required"`
+	Sum    uint   `json:"sum" binding:"required"`
 }
 
 type registerAccountRequest struct {
@@ -29,7 +29,7 @@ func (h *Handler) RegisterAccount(ctx *gin.Context) {
 	}
 
 	newAccount := account.Account{
-		ID:      account.UserID(uuid.NewString()),
+		ID:      uuid.NewString(),
 		Balance: request.Balance,
 	}
 

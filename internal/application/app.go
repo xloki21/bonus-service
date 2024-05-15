@@ -30,11 +30,11 @@ func New(cfg config.AppConfig) (*Application, error) {
 		return nil, err
 	}
 
-	repo := repo.NewRepositoryMongoDB(db)
-	services := service.NewService(repo, cfg)
+	repos := repo.NewRepositoryMongoDB(db)
+	services := service.NewService(repos, cfg)
 	return &Application{
 		cfg:      cfg,
-		repo:     repo,
+		repo:     repos,
 		services: services,
 		teardown: teardown,
 		server:   &controller.Server{},
