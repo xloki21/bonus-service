@@ -17,6 +17,11 @@ type Client struct {
 	httpClient *httppc.Client
 }
 
+//go:generate mockgen -destination=mocks/mocks.go -source=accrual.go -package=mocks
+type HttpAccrualClient interface {
+	GetAccrual(ctx context.Context, transaction *transaction.Transaction) (uint, error)
+}
+
 func (c *Client) GetAccrual(ctx context.Context, tx *transaction.Transaction) (uint, error) {
 	urlString := fmt.Sprintf("%s/info?user=%s&good=%s&timestamp=%d",
 		c.config.Endpoint, tx.UserID, tx.GoodID, tx.Timestamp)
@@ -34,7 +39,6 @@ func (c *Client) GetAccrual(ctx context.Context, tx *transaction.Transaction) (u
 
 	switch response.StatusCode {
 	case http.StatusOK:
-
 		bContent, err := io.ReadAll(response.Body)
 		if err != nil {
 			return 0, err
@@ -63,9 +67,9 @@ func (c *Client) GetRPS() int {
 	return c.config.RPS
 }
 
-func (a *Client) AdjustMaxPoolSize(MaxPoolSize int) {
-	a.config.MaxPoolSize = MaxPoolSize
-	a.httpClient = httppc.New(a.config.MaxPoolSize, MaxPoolSize)
+func (c *Client) AdjustMaxPoolSize(MaxPoolSize int) {
+	c.config.MaxPoolSize = MaxPoolSize
+	c.httpClient = httppc.New(c.config.MaxPoolSize, MaxPoolSize)
 }
 
 func NewClient(config config.AccrualServiceConfig) *Client {

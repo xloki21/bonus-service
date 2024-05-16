@@ -3,6 +3,8 @@ package order
 import (
 	"github.com/google/uuid"
 	"github.com/xloki21/bonus-service/internal/apperr"
+	"github.com/xloki21/bonus-service/internal/entity/transaction"
+	"time"
 )
 
 const MaxOrderGoodsAmount = 100
@@ -35,4 +37,20 @@ func (o Order) Validate() error {
 		uniques[good] = true
 	}
 	return nil
+}
+
+func (o Order) GetTransactions() []transaction.Transaction {
+	txs := make([]transaction.Transaction, 0, len(o.Goods))
+	registeredAt := time.Now().Unix()
+	for _, goodID := range o.Goods {
+		tx := transaction.Transaction{
+			UserID:       o.UserID,
+			Status:       transaction.UNPROCESSED,
+			GoodID:       goodID,
+			Timestamp:    o.Timestamp,
+			RegisteredAt: registeredAt,
+		}
+		txs = append(txs, tx)
+	}
+	return txs
 }

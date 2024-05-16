@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestNewOrderService_Register(t *testing.T) {
+func TestService_Register(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	log.BuildLogger(log.TestLoggerConfig)

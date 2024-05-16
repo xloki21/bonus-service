@@ -24,8 +24,9 @@ type Transaction interface {
 }
 
 type Service struct {
-	cfg  config.AppConfig
-	repo repo.Transaction
+	client *accrual.Client
+	repo   repo.Transaction
+	cfg    config.TransactionServiceConfig
 }
 
 // Polling is a blocking method that polls unprocessed transactions.
@@ -36,10 +37,10 @@ func (s *Service) Polling(ctx context.Context) error {
 	}
 	successfulRounds := 0
 	logger.Info("polling transactions...")
-	client := accrual.NewClient(s.cfg.AccrualService)
-	ticker := time.NewTicker(s.cfg.TransactionServiceConfig.PollingInterval)
+	ticker := time.NewTicker(s.cfg.PollingInterval)
 	defer ticker.Stop() // Stop the ticker so it can be garbage collected
-	batchSize := int64(s.cfg.TransactionServiceConfig.MaxTransactionsPerRequest)
+
+	batchSize := int64(s.cfg.MaxTransactionsPerRequest)
 	for {
 		select {
 		case <-ctx.Done():
@@ -65,7 +66,7 @@ func (s *Service) Polling(ctx context.Context) error {
 				wg.Add(1)
 				go func(wg *sync.WaitGroup, index int) {
 					defer wg.Done()
-					reward, err := client.GetAccrual(ctx, &txs[index])
+					reward, err := s.client.GetAccrual(ctx, &txs[index])
 					if err != nil {
 						errsCh <- err
 						logger.Warnf("error during request to accrual service: %v", err)
@@ -91,8 +92,8 @@ func (s *Service) Polling(ctx context.Context) error {
 				if err != nil {
 					successfulRounds = 0
 					if errors.Is(err, apperr.AccrualServiceTooManyRequests) {
-						adjustedRPS := int(float32(client.GetRPS()) * 0.95)
-						client.AdjustRPS(adjustedRPS)
+						adjustedRPS := int(float32(s.client.GetRPS()) * 0.95)
+						s.client.AdjustRPS(adjustedRPS)
 						break
 					}
 				}
@@ -101,19 +102,19 @@ func (s *Service) Polling(ctx context.Context) error {
 			if successfulRounds > minSuccessfulRoundsToRestoreRPS {
 				// try to restore RPS after successful rounds
 				successfulRounds = minSuccessfulRoundsToRestoreRPS
-				adjustedRPS := int(float32(client.GetRPS()) * 1.05)
+				adjustedRPS := int(float32(s.client.GetRPS()) * 1.05)
 				adjustedRPS = int(math.Min(float64(adjustedRPS), float64(maxRequestsPerSecond))) // cap
-				client.AdjustRPS(adjustedRPS)
+				s.client.AdjustRPS(adjustedRPS)
 			}
 
 			logger.Info("rewarding accounts...")
-			if err := s.repo.RewardAccounts(ctx, int64(s.cfg.TransactionServiceConfig.MaxTransactionsPerRequest)); err != nil {
+			if err := s.repo.RewardAccounts(ctx, batchSize); err != nil {
 				logger.Warnf("polling event error on reward accounts: %v", err)
 			}
 		}
 	}
 }
 
-func NewTransactionService(transactions repo.Transaction, cfg config.AppConfig) *Service {
-	return &Service{repo: transactions, cfg: cfg}
+func NewTransactionService(transactions repo.Transaction, client *accrual.Client, cfg config.TransactionServiceConfig) *Service {
+	return &Service{repo: transactions, client: client, cfg: cfg}
 }

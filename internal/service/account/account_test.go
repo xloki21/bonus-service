@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestAccountService_Debit(t *testing.T) {
+func TestService_Debit(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	log.BuildLogger(log.TestLoggerConfig)
@@ -66,7 +66,7 @@ func TestAccountService_Debit(t *testing.T) {
 	})
 }
 
-func TestAccountService_Credit(t *testing.T) {
+func TestService_Credit(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	log.BuildLogger(log.TestLoggerConfig)
@@ -97,7 +97,7 @@ func TestAccountService_Credit(t *testing.T) {
 	})
 }
 
-func TestAccountService_CreateAccount(t *testing.T) {
+func TestService_CreateAccount(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	log.BuildLogger(log.TestLoggerConfig)

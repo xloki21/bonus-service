@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"github.com/spf13/viper"
 	"github.com/xloki21/bonus-service/internal/repo/mongodb"
 	"os"
@@ -46,6 +47,7 @@ func InitConfigFromViper() (*AppConfig, error) {
 	viper.AddConfigPath(".")
 
 	viper.SetEnvPrefix("BS") // BONUS_SERVICE prefix
+
 	if err := viper.BindEnv("USER"); err != nil {
 		return nil, err
 	}
@@ -77,12 +79,14 @@ func InitConfigFromViper() (*AppConfig, error) {
 		return nil, err
 	}
 
-	if _, ok := os.LookupEnv("BS_USER"); !ok {
-		return nil, errors.New("missing environment variable BS_USER")
-	}
+	defaults := map[string]string{"BS_USER": "user", "BS_PASSWORD": "pass"}
 
-	if _, ok := os.LookupEnv("BS_PASSWORD"); !ok {
-		return nil, errors.New("missing environment variable BS_PASSWORD")
+	for requiredEnv, defaultValue := range defaults {
+		if _, ok := os.LookupEnv(requiredEnv); !ok {
+			if err := os.Setenv(requiredEnv, defaultValue); err != nil {
+				return nil, fmt.Errorf("missing environment variable %s: %w", requiredEnv, err)
+			}
+		}
 	}
 
 	cfg.DB.User = viper.GetString("user")

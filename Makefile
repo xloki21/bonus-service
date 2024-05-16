@@ -6,7 +6,7 @@ build:
 .PHONY: test
 test:
 	go clean -testcache
-	go test -v -race -cover -timeout 30s ./internal/repo/mongodb ./internal/service
+	go test -v -race -cover -timeout 30s ./...
 
 .PHONY: lint
 lint:

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/xloki21/bonus-service/config"
+	"github.com/xloki21/bonus-service/internal/client/accrual"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/repo"
@@ -32,9 +33,10 @@ type Service struct {
 }
 
 func NewService(repos *repo.Repository, cfg config.AppConfig) *Service {
+	accrualClient := accrual.NewClient(cfg.AccrualService)
 	return &Service{
 		Account:     accountSvc.NewAccountService(repos.Account),
 		Order:       orderSvc.NewOrderService(repos.Order),
-		Transaction: transactionSvc.NewTransactionService(repos.Transaction, cfg),
+		Transaction: transactionSvc.NewTransactionService(repos.Transaction, accrualClient, cfg.TransactionServiceConfig),
 	}
 }
