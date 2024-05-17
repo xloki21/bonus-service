@@ -38,7 +38,7 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 }
 
 // Register mocks base method.
-func (m *MockOrder) Register(ctx context.Context, o order.Order) error {
+func (m *MockOrder) Register(ctx context.Context, o order.DTO) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Register", ctx, o)
 	ret0, _ := ret[0].(error)
@@ -75,7 +75,7 @@ func (m *MockAccount) EXPECT() *MockAccountMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockAccount) Create(arg0 context.Context, arg1 account.Account) error {
+func (m *MockAccount) Create(arg0 context.Context, arg1 account.DTO) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -117,7 +117,7 @@ func (mr *MockAccountMockRecorder) Debit(arg0, arg1, arg2 interface{}) *gomock.C
 }
 
 // Delete mocks base method.
-func (m *MockAccount) Delete(arg0 context.Context, arg1 account.Account) error {
+func (m *MockAccount) Delete(arg0 context.Context, arg1 account.DTO) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -131,10 +131,10 @@ func (mr *MockAccountMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockAccount) FindByID(arg0 context.Context, arg1 string) (*account.Account, error) {
+func (m *MockAccount) FindByID(arg0 context.Context, arg1 string) (*account.DTO, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", arg0, arg1)
-	ret0, _ := ret[0].(*account.Account)
+	ret0, _ := ret[0].(*account.DTO)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -169,10 +169,10 @@ func (m *MockTransaction) EXPECT() *MockTransactionMockRecorder {
 }
 
 // FindUnprocessed mocks base method.
-func (m *MockTransaction) FindUnprocessed(ctx context.Context, limit int64) ([]transaction.Transaction, error) {
+func (m *MockTransaction) FindUnprocessed(ctx context.Context, limit int64) ([]transaction.DTO, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindUnprocessed", ctx, limit)
-	ret0, _ := ret[0].([]transaction.Transaction)
+	ret0, _ := ret[0].([]transaction.DTO)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -184,10 +184,10 @@ func (mr *MockTransactionMockRecorder) FindUnprocessed(ctx, limit interface{}) *
 }
 
 // GetOrderTransactions mocks base method.
-func (m *MockTransaction) GetOrderTransactions(arg0 context.Context, arg1 order.Order) ([]transaction.Transaction, error) {
+func (m *MockTransaction) GetOrderTransactions(arg0 context.Context, arg1 order.DTO) ([]transaction.DTO, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOrderTransactions", arg0, arg1)
-	ret0, _ := ret[0].([]transaction.Transaction)
+	ret0, _ := ret[0].([]transaction.DTO)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -213,7 +213,7 @@ func (mr *MockTransactionMockRecorder) RewardAccounts(ctx, limit interface{}) *g
 }
 
 // Update mocks base method.
-func (m *MockTransaction) Update(ctx context.Context, tx *transaction.Transaction) error {
+func (m *MockTransaction) Update(ctx context.Context, tx *transaction.DTO) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", ctx, tx)
 	ret0, _ := ret[0].(error)

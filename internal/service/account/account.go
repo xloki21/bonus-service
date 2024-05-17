@@ -25,7 +25,7 @@ func (a *Service) CreateAccount(ctx context.Context, account account.Account) er
 		return err
 	}
 
-	if err := a.accounts.Create(ctx, account); err != nil {
+	if err := a.accounts.Create(ctx, account.ToDTO()); err != nil {
 		logger.Warnf("account creation failed: %s", err.Error())
 		return err
 	}

@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"bytes"
 	"context"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -9,8 +10,10 @@ import (
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
 	"github.com/xloki21/bonus-service/internal/faker"
 	"github.com/xloki21/bonus-service/internal/repo/mocks"
+	httpcMocks "github.com/xloki21/bonus-service/pkg/httppc/mocks"
 	"github.com/xloki21/bonus-service/pkg/log"
-	"sync"
+	"io"
+	"net/http"
 	"testing"
 	"time"
 )
@@ -31,21 +34,17 @@ func TestService_Polling(t *testing.T) {
 
 		mock := mocks.NewMockTransaction(ctrl)
 		client := accrual.NewClient(cfg.AccrualService)
-		s := NewTransactionService(mock, client, cfg.TransactionServiceConfig)
 
+		mockHttppc := httpcMocks.NewMockHTTPDoer(ctrl)
+		client.SetHTTPClient(mockHttppc)
+		s := NewTransactionService(mock, client, cfg.TransactionServiceConfig)
 		mock.
 			EXPECT().
 			FindUnprocessed(gomock.Any(), gomock.Eq(batchSize)).
-			Return(make([]transaction.Transaction, 0, batchSize), nil).AnyTimes()
+			Return(make([]transaction.DTO, 0, batchSize), nil).AnyTimes()
 
-		wg := &sync.WaitGroup{}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			err = s.Polling(ctxd)
-			assert.Equal(t, context.DeadlineExceeded, err)
-		}()
-		wg.Wait()
+		err = s.Polling(ctxd)
+		assert.Equal(t, context.DeadlineExceeded, err)
 	})
 
 	t.Run("Successfully processed transactions", func(t *testing.T) {
@@ -55,35 +54,47 @@ func TestService_Polling(t *testing.T) {
 
 		mock := mocks.NewMockTransaction(ctrl)
 		client := accrual.NewClient(cfg.AccrualService)
-		s := NewTransactionService(mock, client, cfg.TransactionServiceConfig)
 
+		httpcMock := httpcMocks.NewMockHTTPDoer(ctrl)
+		client.SetHTTPClient(httpcMock)
+		s := NewTransactionService(mock, client, cfg.TransactionServiceConfig)
 		testOrderTxs := faker.NewOrder(int(batchSize)).GetTransactions()
 
-		findUnprocessed := mock.
+		// func call sequence:
+		mock.
 			EXPECT().
 			FindUnprocessed(gomock.Any(), gomock.Eq(batchSize)).
 			Return(testOrderTxs, nil).AnyTimes()
 
-		updateTransactions := mock.
+		httpcMock.
 			EXPECT().
-			Update(gomock.Any(), gomock.Eq(testOrderTxs)).
-			Return(nil).AnyTimes()
+			Do(gomock.Any()).
+			Return(&http.Response{
+				StatusCode:    http.StatusOK,
+				Body:          io.NopCloser(bytes.NewBuffer([]byte("40"))),
+				ContentLength: 2,
+			}, nil).AnyTimes()
 
-		rewardAccounts := mock.
+		for i := range testOrderTxs {
+			testOrderTxs[i].Reward = 40
+			testOrderTxs[i].Status = transaction.PROCESSED
+
+		}
+
+		for i := range testOrderTxs {
+			mock.
+				EXPECT().
+				Update(gomock.Any(), gomock.Eq(&testOrderTxs[i])).
+				Return(nil).AnyTimes()
+		}
+
+		mock.
 			EXPECT().
 			RewardAccounts(gomock.Any(), gomock.Eq(batchSize)).
 			Return(nil).AnyTimes()
 
-		gomock.InOrder(findUnprocessed, updateTransactions, rewardAccounts)
-
-		wg := &sync.WaitGroup{}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			err = s.Polling(ctxd)
-			assert.Equal(t, context.DeadlineExceeded, err)
-		}()
-		wg.Wait()
+		err = s.Polling(ctxd)
+		assert.Equal(t, context.DeadlineExceeded, err)
 
 	})
 

@@ -9,11 +9,27 @@ import (
 
 const MaxOrderGoodsAmount = 100
 
-// Order struct is used to store order data.
+// DTO struct is used to operate with order data in storage
+type DTO struct {
+	UserID    string   `bson:"user_id"`
+	Goods     []string `bson:"goods"`
+	Timestamp int64    `bson:"timestamp"`
+}
+
+// Order struct is used to represent order data.
 type Order struct {
-	UserID    string   `json:"user_id" bson:"user_id" binding:"required"`
-	Goods     []string `json:"goods" bson:"goods" binding:"required"`
-	Timestamp int64    `json:"timestamp" bson:"timestamp" binding:"required"`
+	UserID    string
+	Goods     []string
+	Timestamp int64
+}
+
+// ToDTO converts Order to DTO.
+func (o Order) ToDTO() DTO {
+	return DTO{
+		UserID:    o.UserID,
+		Goods:     o.Goods,
+		Timestamp: o.Timestamp,
+	}
 }
 
 func (o Order) Validate() error {
@@ -39,11 +55,11 @@ func (o Order) Validate() error {
 	return nil
 }
 
-func (o Order) GetTransactions() []transaction.Transaction {
-	txs := make([]transaction.Transaction, 0, len(o.Goods))
+func (o Order) GetTransactions() []transaction.DTO {
+	txs := make([]transaction.DTO, 0, len(o.Goods))
 	registeredAt := time.Now().Unix()
 	for _, goodID := range o.Goods {
-		tx := transaction.Transaction{
+		tx := transaction.DTO{
 			UserID:       o.UserID,
 			Status:       transaction.UNPROCESSED,
 			GoodID:       goodID,

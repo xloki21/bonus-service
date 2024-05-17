@@ -19,7 +19,7 @@ func (a *AccountStorage) collection(name string) *mongo.Collection {
 }
 
 // Create new account.
-func (a *AccountStorage) Create(ctx context.Context, acc account.Account) error {
+func (a *AccountStorage) Create(ctx context.Context, acc account.DTO) error {
 	accounts := a.collection(accountsCollection)
 
 	if _, err := accounts.InsertOne(ctx, acc); err != nil {
@@ -32,7 +32,7 @@ func (a *AccountStorage) Create(ctx context.Context, acc account.Account) error 
 }
 
 // Delete the account.
-func (a *AccountStorage) Delete(ctx context.Context, acc account.Account) error {
+func (a *AccountStorage) Delete(ctx context.Context, acc account.DTO) error {
 	accounts := a.collection(accountsCollection)
 	filter := bson.D{{Key: "user_id", Value: acc.ID}}
 
@@ -47,12 +47,12 @@ func (a *AccountStorage) Delete(ctx context.Context, acc account.Account) error 
 }
 
 // FindByID finds account by user id.
-func (a *AccountStorage) FindByID(ctx context.Context, id string) (*account.Account, error) {
+func (a *AccountStorage) FindByID(ctx context.Context, id string) (*account.DTO, error) {
 	accounts := a.collection(accountsCollection)
 
 	filter := bson.D{{Key: "user_id", Value: id}}
 
-	result := &account.Account{}
+	result := &account.DTO{}
 
 	if err := accounts.FindOne(ctx, filter).Decode(result); err != nil {
 		return nil, apperr.AccountNotFound
@@ -70,7 +70,7 @@ func (a *AccountStorage) Credit(ctx context.Context, id string, value uint) erro
 		return apperr.AccountNotFound
 	}
 	return result.Err()
-	//return fmt.Errorf("can't credit account: %w", result.Err())
+	// fixme: return fmt.Errorf("can't credit account: %w", result.Err())
 }
 
 // Debit debits account.

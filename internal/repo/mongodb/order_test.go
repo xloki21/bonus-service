@@ -52,7 +52,7 @@ func TestOrderMongoDB_Register(t *testing.T) {
 				if _, err := or.db.Collection(ordersCollection).DeleteMany(ctx, bson.M{}); err != nil {
 					return err
 				}
-				return or.Register(ctx, testOrder)
+				return or.Register(ctx, testOrder.ToDTO())
 			},
 			args:        args{order: testOrder},
 			expectedErr: apperr.OrderAlreadyRegistered,
@@ -75,11 +75,11 @@ func TestOrderMongoDB_Register(t *testing.T) {
 				t.Errorf("expected error %v, got %v", nil, err)
 			}
 
-			txDocsBefore, err := tr.GetOrderTransactions(ctx, tc.args.order)
+			txDocsBefore, err := tr.GetOrderTransactions(ctx, tc.args.order.ToDTO())
 			if err != nil {
 				t.Errorf("expected error %v, got %v", nil, err)
 			}
-			if err := or.Register(ctx, tc.args.order); !errors.Is(err, tc.expectedErr) {
+			if err := or.Register(ctx, tc.args.order.ToDTO()); !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
 			}
 
@@ -87,7 +87,7 @@ func TestOrderMongoDB_Register(t *testing.T) {
 			if err != nil {
 				t.Errorf("expected error %v, got %v", nil, err)
 			}
-			txDocsAfter, err := tr.GetOrderTransactions(ctx, tc.args.order)
+			txDocsAfter, err := tr.GetOrderTransactions(ctx, tc.args.order.ToDTO())
 			if err != nil {
 				t.Errorf("expected error %v, got %v", nil, err)
 			}

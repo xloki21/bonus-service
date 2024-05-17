@@ -17,12 +17,11 @@ type Client struct {
 	httpClient *httppc.Client
 }
 
-//go:generate mockgen -destination=mocks/mocks.go -source=accrual.go -package=mocks
-type HttpAccrualClient interface {
-	GetAccrual(ctx context.Context, transaction *transaction.Transaction) (uint, error)
+func (c *Client) SetHTTPClient(client httppc.HTTPDoer) {
+	c.httpClient.SetClient(client)
 }
 
-func (c *Client) GetAccrual(ctx context.Context, tx *transaction.Transaction) (uint, error) {
+func (c *Client) GetAccrual(ctx context.Context, tx *transaction.DTO) (uint, error) {
 	urlString := fmt.Sprintf("%s/info?user=%s&good=%s&timestamp=%d",
 		c.config.Endpoint, tx.UserID, tx.GoodID, tx.Timestamp)
 

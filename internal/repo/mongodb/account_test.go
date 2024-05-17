@@ -47,7 +47,7 @@ func TestAccountMongoDB_Create(t *testing.T) {
 		{
 			name: "account with registered user id",
 			precondition: func() error {
-				return r.Create(ctx, testAccount)
+				return r.Create(ctx, testAccount.ToDTO())
 			},
 			args:        args{account: testAccount},
 			expectedErr: apperr.AccountAlreadyExists,
@@ -61,7 +61,7 @@ func TestAccountMongoDB_Create(t *testing.T) {
 					t.Errorf("expected error %v, got %v", nil, err)
 				}
 			}
-			if err := r.Create(ctx, tc.args.account); !errors.Is(err, tc.expectedErr) {
+			if err := r.Create(ctx, tc.args.account.ToDTO()); !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
 			}
 		})
@@ -105,7 +105,7 @@ func TestAccountMongoDB_FindByID(t *testing.T) {
 		{
 			name: "registered account",
 			precondition: func() error {
-				return r.Create(ctx, testAccount)
+				return r.Create(ctx, testAccount.ToDTO())
 			},
 			args:        args{id: testAccount.ID},
 			expectedErr: nil,
@@ -164,7 +164,7 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 		{
 			name: "existing account id",
 			precondition: func() error {
-				return r.Create(ctx, testAccount)
+				return r.Create(ctx, testAccount.ToDTO())
 			},
 			args:        args{id: testAccount.ID, value: 100},
 			expectedErr: nil,
@@ -224,10 +224,10 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 		{
 			name: "existing account with insufficient balance",
 			precondition: func() error {
-				return r.Create(ctx, testAccount)
+				return r.Create(ctx, testAccount.ToDTO())
 			},
 			postcondition: func() error {
-				return r.Delete(ctx, testAccount)
+				return r.Delete(ctx, testAccount.ToDTO())
 			},
 			args:        args{id: testAccount.ID, value: testAccount.Balance + 1},
 			expectedErr: apperr.InsufficientBalance,
@@ -235,10 +235,10 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 		{
 			name: "existing account with sufficient balance",
 			precondition: func() error {
-				return r.Create(ctx, testAccount)
+				return r.Create(ctx, testAccount.ToDTO())
 			},
 			postcondition: func() error {
-				return r.Delete(ctx, testAccount)
+				return r.Delete(ctx, testAccount.ToDTO())
 			},
 			args:        args{id: testAccount.ID, value: testAccount.Balance - 1},
 			expectedErr: nil,

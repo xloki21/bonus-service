@@ -1,20 +1,20 @@
 package account
 
-import (
-	"github.com/google/uuid"
-)
-
-// Account of user in loyalty program.
+// Account struct is used to represent account data.
 type Account struct {
-	ID      string `json:"user_id" bson:"user_id"`
-	Balance uint   `json:"balance" bson:"balance"`
+	ID      string
+	Balance uint
 }
 
-func (u *Account) Validate() error {
-	// Validate UserID
-	if err := uuid.Validate(u.ID); err != nil {
-		return err
-	}
+// DTO struct is used to operate with account data in storage
+type DTO struct {
+	ID      string `bson:"user_id"`
+	Balance uint   `bson:"balance"`
+}
 
-	return nil
+func (a *Account) ToDTO() DTO {
+	return DTO{
+		ID:      a.ID,
+		Balance: a.Balance,
+	}
 }

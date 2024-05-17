@@ -6,11 +6,16 @@ import (
 )
 
 type Client struct {
-	client       *http.Client
+	client       HTTPDoer
 	maxPoolSize  int
 	sem          chan struct{}
 	reqPerSecond int
 	rateLimiter  <-chan time.Time
+}
+
+//go:generate mockgen -destination=mocks/mocks.go -source=client.go -package=mocks
+type HTTPDoer interface {
+	Do(req *http.Request) (*http.Response, error)
 }
 
 func New(maxPoolSize int, reqPerSec int) *Client {
@@ -25,12 +30,16 @@ func New(maxPoolSize int, reqPerSec int) *Client {
 	}
 
 	return &Client{
-		client:       &http.Client{},
+		client:       http.DefaultClient,
 		maxPoolSize:  maxPoolSize,
 		sem:          sem,
 		reqPerSecond: reqPerSec,
 		rateLimiter:  emitter,
 	}
+}
+
+func (c *Client) SetClient(client HTTPDoer) {
+	c.client = client
 }
 
 func (c *Client) Do(req *http.Request) (*http.Response, error) {

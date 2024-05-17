@@ -17,7 +17,7 @@ func (o *Service) Register(ctx context.Context, order order.Order) error {
 		return err
 	}
 
-	if err := o.orders.Register(ctx, order); err != nil {
+	if err := o.orders.Register(ctx, order.ToDTO()); err != nil {
 		logger.Warnf("order registration failed: %v", err)
 		return err
 	}

@@ -26,7 +26,7 @@ func TestService_Debit(t *testing.T) {
 
 		mock.
 			EXPECT().
-			Create(gomock.Any(), gomock.Eq(testAccount)).
+			Create(gomock.Any(), gomock.Eq(testAccount.ToDTO())).
 			Return(nil)
 
 		err := s.CreateAccount(ctx, testAccount)
@@ -49,7 +49,7 @@ func TestService_Debit(t *testing.T) {
 
 		mock.
 			EXPECT().
-			Create(gomock.Any(), gomock.Eq(testAccount)).
+			Create(gomock.Any(), gomock.Eq(testAccount.ToDTO())).
 			Return(nil)
 
 		err := s.CreateAccount(ctx, testAccount)
@@ -81,7 +81,7 @@ func TestService_Credit(t *testing.T) {
 
 		mock.
 			EXPECT().
-			Create(gomock.Any(), gomock.Eq(testAccount)).
+			Create(gomock.Any(), gomock.Eq(testAccount.ToDTO())).
 			Return(nil)
 
 		err := s.CreateAccount(ctx, testAccount)
@@ -112,7 +112,7 @@ func TestService_CreateAccount(t *testing.T) {
 
 		mock.
 			EXPECT().
-			Create(gomock.Any(), gomock.Eq(testAccount)).
+			Create(gomock.Any(), gomock.Eq(testAccount.ToDTO())).
 			Return(nil)
 
 		assert.Nil(t, s.CreateAccount(ctx, testAccount), "should be no error")
@@ -125,13 +125,13 @@ func TestService_CreateAccount(t *testing.T) {
 		testAccount := faker.NewAccount()
 
 		mock.EXPECT().
-			Create(gomock.Any(), gomock.Eq(testAccount)).
+			Create(gomock.Any(), gomock.Eq(testAccount.ToDTO())).
 			Return(nil)
 
 		_ = s.CreateAccount(ctx, testAccount)
 		mock.
 			EXPECT().
-			Create(gomock.Any(), gomock.Eq(testAccount)).
+			Create(gomock.Any(), gomock.Eq(testAccount.ToDTO())).
 			Return(apperr.AccountAlreadyExists)
 
 		assert.ErrorIs(t, s.CreateAccount(ctx, testAccount), apperr.AccountAlreadyExists)

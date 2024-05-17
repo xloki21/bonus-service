@@ -70,7 +70,7 @@ func TestTransactionMongoDB_FindUnprocessed(t *testing.T) {
 				t.Errorf("expected error %v, got %v", nil, err)
 			}
 
-			if err := or.Register(ctx, tc.args.order); err != nil {
+			if err := or.Register(ctx, tc.args.order.ToDTO()); err != nil {
 				t.Errorf("expected error %v, got %v", nil, err)
 			}
 			txAfter, err := tr.FindUnprocessed(ctx, tc.args.limit)

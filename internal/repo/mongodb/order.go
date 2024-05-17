@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/xloki21/bonus-service/internal/apperr"
-	t "github.com/xloki21/bonus-service/internal/entity/order"
+	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
@@ -23,7 +23,7 @@ func (o *OrderStorage) collection(name string) *mongo.Collection {
 }
 
 // Register order to repository and create transactions.
-func (o *OrderStorage) Register(ctx context.Context, order t.Order) error {
+func (o *OrderStorage) Register(ctx context.Context, order order.DTO) error {
 	orders := o.collection(ordersCollection)
 	transactions := o.collection(transactionsCollection)
 
@@ -43,7 +43,7 @@ func (o *OrderStorage) Register(ctx context.Context, order t.Order) error {
 
 		registeredAt := time.Now().Unix()
 		for _, goodID := range order.Goods {
-			tx := transaction.Transaction{
+			tx := transaction.DTO{
 				UserID:       order.UserID,
 				Status:       transaction.UNPROCESSED,
 				GoodID:       goodID,

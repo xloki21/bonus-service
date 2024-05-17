@@ -22,11 +22,11 @@ func (t *TransactionStorage) collection(name string) *mongo.Collection {
 	return t.db.Collection(name)
 }
 
-func (t *TransactionStorage) GetOrderTransactions(ctx context.Context, order order.Order) ([]transaction.Transaction, error) {
+func (t *TransactionStorage) GetOrderTransactions(ctx context.Context, order order.DTO) ([]transaction.DTO, error) {
 	transactions := t.collection(transactionsCollection)
 	opts := options.Find()
 
-	ops := make([]transaction.Transaction, 0, len(order.Goods))
+	ops := make([]transaction.DTO, 0, len(order.Goods))
 	cursor, err := transactions.Find(ctx,
 		bson.D{
 			{Key: "user_id", Value: order.UserID},
@@ -39,7 +39,7 @@ func (t *TransactionStorage) GetOrderTransactions(ctx context.Context, order ord
 
 	defer cursor.Close(ctx)
 	for cursor.Next(ctx) {
-		var tx transaction.Transaction
+		var tx transaction.DTO
 		if err := cursor.Decode(&tx); err != nil {
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func (t *TransactionStorage) run(ctx context.Context, f func(ctx context.Context
 }
 
 // Update transaction status and reward.
-func (t *TransactionStorage) Update(ctx context.Context, tx *transaction.Transaction) error {
+func (t *TransactionStorage) Update(ctx context.Context, tx *transaction.DTO) error {
 	transactions := t.collection(transactionsCollection)
 	filter := bson.M{"_id": tx.ID.(primitive.ObjectID)}
 	update := bson.M{"$set": bson.M{"status": tx.Status, "reward": tx.Reward, "completed_at": tx.CompletedAt}}
@@ -153,13 +153,13 @@ func (t *TransactionStorage) RewardAccounts(ctx context.Context, limit int64) er
 }
 
 // FindUnprocessed returns unprocessed transactions.
-func (t *TransactionStorage) FindUnprocessed(ctx context.Context, limit int64) ([]transaction.Transaction, error) {
+func (t *TransactionStorage) FindUnprocessed(ctx context.Context, limit int64) ([]transaction.DTO, error) {
 	transactions := t.collection(transactionsCollection)
 	opts := options.Find()
 	opts.SetSort(bson.D{{Key: "registered_at", Value: 1}})
 	opts.SetLimit(limit)
 
-	ops := make([]transaction.Transaction, 0, limit)
+	ops := make([]transaction.DTO, 0, limit)
 	cursor, err := transactions.Find(ctx, bson.D{
 		{Key: "status", Value: bson.D{{Key: "$eq", Value: transaction.UNPROCESSED}}},
 	}, opts)
@@ -170,7 +170,7 @@ func (t *TransactionStorage) FindUnprocessed(ctx context.Context, limit int64) (
 
 	defer cursor.Close(ctx)
 	for cursor.Next(ctx) {
-		var tx transaction.Transaction
+		var tx transaction.DTO
 		if err := cursor.Decode(&tx); err != nil {
 			return nil, err
 		}

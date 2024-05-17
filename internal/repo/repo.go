@@ -11,22 +11,22 @@ import (
 
 //go:generate mockgen -destination=mocks/mocks.go -source=repo.go -package=mocks
 type Order interface {
-	Register(ctx context.Context, o order.Order) error
+	Register(ctx context.Context, o order.DTO) error
 }
 
 type Account interface {
-	Create(context.Context, account.Account) error
-	Delete(context.Context, account.Account) error
-	FindByID(context.Context, string) (*account.Account, error)
+	Create(context.Context, account.DTO) error
+	Delete(context.Context, account.DTO) error
+	FindByID(context.Context, string) (*account.DTO, error)
 	Credit(context.Context, string, uint) error
 	Debit(context.Context, string, uint) error
 }
 
 type Transaction interface {
-	FindUnprocessed(ctx context.Context, limit int64) ([]transaction.Transaction, error)
-	GetOrderTransactions(context.Context, order.Order) ([]transaction.Transaction, error)
+	FindUnprocessed(ctx context.Context, limit int64) ([]transaction.DTO, error)
+	GetOrderTransactions(context.Context, order.DTO) ([]transaction.DTO, error)
 	RewardAccounts(ctx context.Context, limit int64) error
-	Update(ctx context.Context, tx *transaction.Transaction) error
+	Update(ctx context.Context, tx *transaction.DTO) error
 }
 
 type Repository struct {
