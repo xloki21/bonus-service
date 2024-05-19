@@ -165,14 +165,14 @@ func (t *TransactionStorage) FindUnprocessed(ctx context.Context, limit int64) (
 	}, opts)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("find unprocessed transactions error: %w", err)
 	}
 
 	defer cursor.Close(ctx)
 	for cursor.Next(ctx) {
 		var tx transaction.DTO
 		if err := cursor.Decode(&tx); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("find unprocessed transactions error: %w", err)
 		}
 		ops = append(ops, tx)
 	}

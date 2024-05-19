@@ -69,8 +69,10 @@ func (a *AccountStorage) Credit(ctx context.Context, id string, value uint) erro
 	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
 		return apperr.AccountNotFound
 	}
-	return result.Err()
-	// fixme: return fmt.Errorf("can't credit account: %w", result.Err())
+	if result.Err() != nil {
+		return fmt.Errorf("can't credit account: %w", result.Err())
+	}
+	return nil
 }
 
 // Debit debits account.

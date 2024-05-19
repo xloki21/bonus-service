@@ -3,9 +3,11 @@ package transaction
 import (
 	"bytes"
 	"context"
+	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/xloki21/bonus-service/config"
+	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/client/accrual"
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
 	"github.com/xloki21/bonus-service/internal/faker"
@@ -14,6 +16,7 @@ import (
 	"github.com/xloki21/bonus-service/pkg/log"
 	"io"
 	"net/http"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -24,12 +27,12 @@ func TestService_Polling(t *testing.T) {
 	cfg, err := config.InitConfigFromViper()
 	assert.NoError(t, err)
 	log.BuildLogger(log.TestLoggerConfig)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 	batchSize := int64(cfg.TransactionServiceConfig.MaxTransactionsPerRequest)
-	t.Run("No new transactions to process", func(t *testing.T) {
+
+	t.Run("unprocessed transactions error", func(t *testing.T) {
 		t.Parallel()
-		ctxd, cancelFn := context.WithTimeout(ctx, time.Second*5)
+		ctrl := gomock.NewController(t) // New in go1.14+ no longer need to call ctrl.Finish()
+		ctxd, cancelFn := context.WithCancel(ctx)
 		defer cancelFn()
 
 		mock := mocks.NewMockTransaction(ctrl)
@@ -38,64 +41,143 @@ func TestService_Polling(t *testing.T) {
 		mockHttppc := httpcMocks.NewMockHTTPDoer(ctrl)
 		client.SetHTTPClient(mockHttppc)
 		s := NewTransactionService(mock, client, cfg.TransactionServiceConfig)
+
 		mock.
 			EXPECT().
 			FindUnprocessed(gomock.Any(), gomock.Eq(batchSize)).
-			Return(make([]transaction.DTO, 0, batchSize), nil).AnyTimes()
+			Return(nil, errors.Join(apperr.TransactionProcessingError, errors.New("find unprocessed transactions error")))
 
-		err = s.Polling(ctxd)
-		assert.Equal(t, context.DeadlineExceeded, err)
+		assert.ErrorIs(t, txProcessingRound(ctxd, s.repo, s.client, batchSize), apperr.TransactionProcessingError)
 	})
 
-	t.Run("Successfully processed transactions", func(t *testing.T) {
+	t.Run("accrual service error: accrual not found", func(t *testing.T) {
 		t.Parallel()
+		ctrl := gomock.NewController(t) // New in go1.14+ no longer need to call ctrl.Finish()
+		ctxd, cancelFn := context.WithCancel(ctx)
+		defer cancelFn()
+
+		mock := mocks.NewMockTransaction(ctrl)
+		client := accrual.NewClient(cfg.AccrualService)
+
+		mockRequest := httpcMocks.NewMockHTTPDoer(ctrl)
+		client.SetHTTPClient(mockRequest)
+		s := NewTransactionService(mock, client, cfg.TransactionServiceConfig)
+
+		orderTransactions := faker.NewOrder(int(batchSize)).GetTransactions()
+
+		mock.
+			EXPECT().
+			FindUnprocessed(gomock.Any(), gomock.Eq(batchSize)).
+			Return(orderTransactions, nil)
+
+		mockRequest.
+			EXPECT().
+			Do(gomock.Any()).
+			Return(&http.Response{
+				StatusCode: http.StatusNotFound,
+			}, apperr.AccrualNotFound).AnyTimes()
+
+		assert.ErrorIs(t, txProcessingRound(ctxd, s.repo, s.client, batchSize), apperr.TransactionProcessingError)
+	})
+
+	t.Run("accrual service error: too many requests", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t) // New in go1.14+ no longer need to call ctrl.Finish()
+		ctxd, cancelFn := context.WithCancel(ctx)
+		defer cancelFn()
+
+		mock := mocks.NewMockTransaction(ctrl)
+		client := accrual.NewClient(cfg.AccrualService)
+
+		mockRequest := httpcMocks.NewMockHTTPDoer(ctrl)
+		client.SetHTTPClient(mockRequest)
+		s := NewTransactionService(mock, client, cfg.TransactionServiceConfig)
+
+		orderTransactions := faker.NewOrder(int(batchSize)).GetTransactions()
+
+		mock.
+			EXPECT().
+			FindUnprocessed(gomock.Any(), gomock.Eq(batchSize)).
+			Return(orderTransactions, nil)
+
+		mockRequest.
+			EXPECT().
+			Do(gomock.Any()).
+			Return(&http.Response{
+				StatusCode: http.StatusTooManyRequests,
+			}, apperr.AccrualServiceTooManyRequests).AnyTimes()
+
+		assert.ErrorIs(t, txProcessingRound(ctxd, s.repo, s.client, batchSize), apperr.TransactionProcessingError)
+	})
+
+	t.Run("Success path: no new transactions to process", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t) // New in go1.14+ no longer need to call ctrl.Finish()
+		ctxd, cancelFn := context.WithCancel(ctx)
+		defer cancelFn()
+
+		mock := mocks.NewMockTransaction(ctrl)
+		client := accrual.NewClient(cfg.AccrualService)
+
+		mockRequest := httpcMocks.NewMockHTTPDoer(ctrl)
+		client.SetHTTPClient(mockRequest)
+		s := NewTransactionService(mock, client, cfg.TransactionServiceConfig)
+
+		mock.
+			EXPECT().
+			FindUnprocessed(gomock.Any(), gomock.Eq(batchSize)).
+			Return(make([]transaction.DTO, 0, batchSize), nil)
+
+		assert.NoError(t, txProcessingRound(ctxd, s.repo, s.client, batchSize))
+	})
+
+	t.Run("Success path: all ok", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t) // New in go1.14+ no longer need to call ctrl.Finish()
+
 		ctxd, cancelFn := context.WithTimeout(ctx, time.Second*5)
 		defer cancelFn()
 
 		mock := mocks.NewMockTransaction(ctrl)
 		client := accrual.NewClient(cfg.AccrualService)
 
-		httpcMock := httpcMocks.NewMockHTTPDoer(ctrl)
-		client.SetHTTPClient(httpcMock)
+		mockRequest := httpcMocks.NewMockHTTPDoer(ctrl)
+		client.SetHTTPClient(mockRequest)
 		s := NewTransactionService(mock, client, cfg.TransactionServiceConfig)
-		testOrderTxs := faker.NewOrder(int(batchSize)).GetTransactions()
 
-		// func call sequence:
+		beforeTestOrderTxs := faker.NewOrder(int(batchSize)).GetTransactions()
+		afterTestOrderTxs := make([]transaction.DTO, batchSize)
+
+		copy(afterTestOrderTxs, beforeTestOrderTxs)
 		mock.
 			EXPECT().
 			FindUnprocessed(gomock.Any(), gomock.Eq(batchSize)).
-			Return(testOrderTxs, nil).AnyTimes()
+			Return(beforeTestOrderTxs, nil)
 
-		httpcMock.
-			EXPECT().
-			Do(gomock.Any()).
-			Return(&http.Response{
-				StatusCode:    http.StatusOK,
-				Body:          io.NopCloser(bytes.NewBuffer([]byte("40"))),
-				ContentLength: 2,
-			}, nil).AnyTimes()
-
-		for i := range testOrderTxs {
-			testOrderTxs[i].Reward = 40
-			testOrderTxs[i].Status = transaction.PROCESSED
-
+		testRewardValue := uint(40)
+		for _ = range beforeTestOrderTxs {
+			mockRequest.
+				EXPECT().
+				Do(gomock.Any()).
+				Return(&http.Response{
+					StatusCode:    http.StatusOK,
+					Body:          io.NopCloser(bytes.NewBuffer([]byte(strconv.Itoa(int(testRewardValue))))),
+					ContentLength: 2,
+				}, nil)
 		}
 
-		for i := range testOrderTxs {
+		for i := range afterTestOrderTxs {
+			afterTestOrderTxs[i].Reward = testRewardValue
+			afterTestOrderTxs[i].Status = transaction.PROCESSED
+		}
+
+		for i := range afterTestOrderTxs {
 			mock.
 				EXPECT().
-				Update(gomock.Any(), gomock.Eq(&testOrderTxs[i])).
-				Return(nil).AnyTimes()
+				Update(gomock.Any(), gomock.Eq(&afterTestOrderTxs[i])).
+				Return(nil)
 		}
 
-		mock.
-			EXPECT().
-			RewardAccounts(gomock.Any(), gomock.Eq(batchSize)).
-			Return(nil).AnyTimes()
-
-		err = s.Polling(ctxd)
-		assert.Equal(t, context.DeadlineExceeded, err)
-
+		assert.NoError(t, txProcessingRound(ctxd, s.repo, s.client, batchSize))
 	})
-
 }

@@ -178,7 +178,7 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 					t.Errorf("expected error %v, got %v", nil, err)
 				}
 			}
-			if err := r.Credit(ctx, tc.args.id, tc.args.value); !errors.Is(tc.expectedErr, err) {
+			if err := r.Credit(ctx, tc.args.id, tc.args.value); !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
 			}
 		})
