@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/account"
 	"github.com/xloki21/bonus-service/internal/faker"
@@ -13,18 +14,13 @@ import (
 func TestAccountMongoDB_Create(t *testing.T) {
 	ctx := context.Background()
 	db, teardown, err := NewMongoDB(context.Background(), TestDBConfig)
+	assert.NoError(t, err)
 
-	if err != nil {
-		t.Fatalf("failed to connect to mongodb: %v", err)
-	}
 	defer func() {
-		if err := teardown(ctx); err != nil {
-			t.Fatal(err)
-		}
+		assert.NoError(t, teardown(ctx))
 	}()
 
 	r := NewAccountStorage(db)
-
 	type args struct {
 		account account.Account
 	}
@@ -35,7 +31,6 @@ func TestAccountMongoDB_Create(t *testing.T) {
 		precondition func() error
 		expectedErr  error
 	}
-
 	testAccount := faker.NewAccount()
 
 	testCases := []testCase{
@@ -57,9 +52,7 @@ func TestAccountMongoDB_Create(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.precondition != nil {
-				if err := tc.precondition(); err != nil {
-					t.Errorf("expected error %v, got %v", nil, err)
-				}
+				assert.NoError(t, tc.precondition())
 			}
 			if err := r.Create(ctx, tc.args.account.ToDTO()); !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
@@ -72,14 +65,10 @@ func TestAccountMongoDB_Create(t *testing.T) {
 func TestAccountMongoDB_FindByID(t *testing.T) {
 	ctx := context.Background()
 	db, teardown, err := NewMongoDB(context.Background(), TestDBConfig)
+	assert.NoError(t, err)
 
-	if err != nil {
-		t.Fatalf("failed to connect to mongodb: %v", err)
-	}
 	defer func() {
-		if err := teardown(ctx); err != nil {
-			t.Fatal(err)
-		}
+		assert.NoError(t, teardown(ctx))
 	}()
 
 	r := NewAccountStorage(db)
@@ -115,9 +104,7 @@ func TestAccountMongoDB_FindByID(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.precondition != nil {
-				if err := tc.precondition(); err != nil {
-					t.Errorf("expected error %v, got %v", nil, err)
-				}
+				assert.NoError(t, tc.precondition())
 			}
 			if _, err := r.FindByID(ctx, tc.args.id); !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
@@ -129,14 +116,10 @@ func TestAccountMongoDB_FindByID(t *testing.T) {
 func TestAccountMongoDB_Credit(t *testing.T) {
 	ctx := context.Background()
 	db, teardown, err := NewMongoDB(context.Background(), TestDBConfig)
+	assert.NoError(t, err)
 
-	if err != nil {
-		t.Fatalf("failed to connect to mongodb: %v", err)
-	}
 	defer func() {
-		if err := teardown(ctx); err != nil {
-			t.Fatal(err)
-		}
+		assert.NoError(t, teardown(ctx))
 	}()
 
 	r := NewAccountStorage(db)
@@ -174,9 +157,7 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.precondition != nil {
-				if err := tc.precondition(); err != nil {
-					t.Errorf("expected error %v, got %v", nil, err)
-				}
+				assert.NoError(t, tc.precondition())
 			}
 			if err := r.Credit(ctx, tc.args.id, tc.args.value); !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
@@ -188,14 +169,9 @@ func TestAccountMongoDB_Credit(t *testing.T) {
 func TestAccountMongoDB_Debit(t *testing.T) {
 	ctx := context.Background()
 	db, teardown, err := NewMongoDB(context.Background(), TestDBConfig)
-
-	if err != nil {
-		t.Fatalf("failed to connect to mongodb: %v", err)
-	}
+	assert.NoError(t, err)
 	defer func() {
-		if err := teardown(ctx); err != nil {
-			t.Fatal(err)
-		}
+		assert.NoError(t, teardown(ctx))
 	}()
 
 	r := NewAccountStorage(db)
@@ -248,17 +224,13 @@ func TestAccountMongoDB_Debit(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.precondition != nil {
-				if err := tc.precondition(); err != nil {
-					t.Errorf("expected error %v, got %v", nil, err)
-				}
+				assert.NoError(t, tc.precondition())
 			}
 			if err := r.Debit(ctx, tc.args.id, tc.args.value); !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
 			}
 			if tc.postcondition != nil {
-				if err := tc.postcondition(); err != nil {
-					t.Errorf("expected error %v, got %v", nil, err)
-				}
+				assert.NoError(t, tc.postcondition())
 			}
 
 		})

@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"github.com/stretchr/testify/assert"
 	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/faker"
 	"go.mongodb.org/mongo-driver/bson"
@@ -11,14 +12,10 @@ import (
 func TestTransactionMongoDB_FindUnprocessed(t *testing.T) {
 	ctx := context.Background()
 	db, teardown, err := NewMongoDB(context.Background(), TestDBConfig)
+	assert.NoError(t, err)
 
-	if err != nil {
-		t.Fatalf("failed to connect to mongodb: %v", err)
-	}
 	defer func() {
-		if err := teardown(ctx); err != nil {
-			t.Fatal(err)
-		}
+		assert.NoError(t, teardown(ctx))
 	}()
 
 	or := NewOrderStorage(db)
@@ -60,23 +57,17 @@ func TestTransactionMongoDB_FindUnprocessed(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.precondition != nil {
-				if err := tc.precondition(); err != nil {
-					t.Errorf("expected error %v, got %v", nil, err)
-				}
+				assert.NoError(t, tc.precondition())
 			}
 
 			txBefore, err := tr.FindUnprocessed(ctx, tc.args.limit)
-			if err != nil {
-				t.Errorf("expected error %v, got %v", nil, err)
-			}
+			assert.NoError(t, err)
 
-			if err := or.Register(ctx, tc.args.order.ToDTO()); err != nil {
-				t.Errorf("expected error %v, got %v", nil, err)
-			}
+			assert.NoError(t, or.Register(ctx, tc.args.order.ToDTO()))
+
 			txAfter, err := tr.FindUnprocessed(ctx, tc.args.limit)
-			if err != nil {
-				t.Errorf("expected error %v, got %v", nil, err)
-			}
+			assert.NoError(t, err)
+
 			newTransactions := len(txAfter) - len(txBefore)
 			newTxExpected := min(int(tc.args.limit), newTransactions)
 			if newTransactions != newTxExpected {
@@ -84,9 +75,7 @@ func TestTransactionMongoDB_FindUnprocessed(t *testing.T) {
 			}
 
 			if tc.postcondition != nil {
-				if err := tc.postcondition(); err != nil {
-					t.Errorf("expected error %v, got %v", nil, err)
-				}
+				assert.NoError(t, tc.postcondition())
 			}
 		})
 	}

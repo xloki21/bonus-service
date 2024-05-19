@@ -16,7 +16,6 @@ func TestService_Debit(t *testing.T) {
 	ctx := context.Background()
 	log.BuildLogger(log.TestLoggerConfig)
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	t.Run("debit account with insufficient funds", func(t *testing.T) {
 		t.Parallel()
@@ -62,7 +61,7 @@ func TestService_Debit(t *testing.T) {
 			Debit(gomock.Any(), gomock.Eq(testAccount.ID), gomock.Eq(value)).
 			Return(nil)
 
-		assert.Nil(t, s.Debit(ctx, testAccount.ID, value), "should be no error")
+		assert.NoError(t, s.Debit(ctx, testAccount.ID, value))
 	})
 }
 
@@ -71,7 +70,6 @@ func TestService_Credit(t *testing.T) {
 	ctx := context.Background()
 	log.BuildLogger(log.TestLoggerConfig)
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	t.Run("credit account with success", func(t *testing.T) {
 		t.Parallel()
@@ -93,7 +91,7 @@ func TestService_Credit(t *testing.T) {
 			Credit(gomock.Any(), gomock.Eq(testAccount.ID), gomock.Eq(value)).
 			Return(nil)
 
-		assert.Nil(t, s.Credit(ctx, testAccount.ID, value), "should be no error")
+		assert.NoError(t, s.Credit(ctx, testAccount.ID, value))
 	})
 }
 
@@ -102,7 +100,6 @@ func TestService_CreateAccount(t *testing.T) {
 	ctx := context.Background()
 	log.BuildLogger(log.TestLoggerConfig)
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	t.Run("create new account with success", func(t *testing.T) {
 		t.Parallel()
@@ -115,7 +112,7 @@ func TestService_CreateAccount(t *testing.T) {
 			Create(gomock.Any(), gomock.Eq(testAccount.ToDTO())).
 			Return(nil)
 
-		assert.Nil(t, s.CreateAccount(ctx, testAccount), "should be no error")
+		assert.NoError(t, s.CreateAccount(ctx, testAccount))
 	})
 
 	t.Run("create already registered account with fail", func(t *testing.T) {

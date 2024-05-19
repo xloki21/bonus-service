@@ -26,6 +26,7 @@ func TestService_Polling(t *testing.T) {
 	ctx := context.Background()
 	cfg, err := config.InitConfigFromViper()
 	assert.NoError(t, err)
+
 	log.BuildLogger(log.TestLoggerConfig)
 	batchSize := int64(cfg.TransactionServiceConfig.MaxTransactionsPerRequest)
 

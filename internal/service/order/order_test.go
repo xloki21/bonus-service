@@ -16,7 +16,6 @@ func TestService_Register(t *testing.T) {
 	ctx := context.Background()
 	log.BuildLogger(log.TestLoggerConfig)
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	t.Run("register New order", func(t *testing.T) {
 		t.Parallel()
@@ -30,10 +29,10 @@ func TestService_Register(t *testing.T) {
 			Register(gomock.Any(), gomock.Eq(testOrder.ToDTO())).
 			Return(nil)
 
-		assert.Nil(t, s.Register(ctx, testOrder), "Should be no error")
+		assert.NoError(t, s.Register(ctx, testOrder))
 	})
 
-	t.Run("register Already registered order", func(t *testing.T) {
+	t.Run("register already registered order", func(t *testing.T) {
 		t.Parallel()
 		mock := mocks.NewMockOrder(ctrl)
 		s := NewOrderService(mock)

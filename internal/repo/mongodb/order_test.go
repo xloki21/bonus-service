@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"github.com/stretchr/testify/assert"
 	"github.com/xloki21/bonus-service/internal/apperr"
 	"github.com/xloki21/bonus-service/internal/entity/order"
 	"github.com/xloki21/bonus-service/internal/faker"
@@ -14,14 +15,9 @@ import (
 func TestOrderMongoDB_Register(t *testing.T) {
 	ctx := context.Background()
 	db, teardown, err := NewMongoDB(context.Background(), TestDBConfig)
-
-	if err != nil {
-		t.Fatalf("failed to connect to mongodb: %v", err)
-	}
+	assert.NoError(t, err)
 	defer func() {
-		if err := teardown(ctx); err != nil {
-			t.Fatal(err)
-		}
+		assert.NoError(t, teardown(ctx))
 	}()
 
 	or := NewOrderStorage(db)
@@ -49,7 +45,7 @@ func TestOrderMongoDB_Register(t *testing.T) {
 		{
 			name: "already registered order",
 			precondition: func() error {
-				if _, err := or.db.Collection(ordersCollection).DeleteMany(ctx, bson.M{}); err != nil {
+				if _, err := or.collection(ordersCollection).DeleteMany(ctx, bson.M{}); err != nil {
 					return err
 				}
 				return or.Register(ctx, testOrder.ToDTO())
@@ -66,31 +62,23 @@ func TestOrderMongoDB_Register(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.precondition != nil {
-				if err := tc.precondition(); err != nil {
-					t.Errorf("expected error %v, got %v", nil, err)
-				}
+				assert.NoError(t, tc.precondition())
 			}
 			ordersDocsBefore, err := countDocuments(ctx, ordersCollection)
-			if err != nil {
-				t.Errorf("expected error %v, got %v", nil, err)
-			}
+			assert.NoError(t, err)
 
 			txDocsBefore, err := tr.GetOrderTransactions(ctx, tc.args.order.ToDTO())
-			if err != nil {
-				t.Errorf("expected error %v, got %v", nil, err)
-			}
+			assert.NoError(t, err)
+
 			if err := or.Register(ctx, tc.args.order.ToDTO()); !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
 			}
 
 			ordersDocsAfter, err := countDocuments(ctx, ordersCollection)
-			if err != nil {
-				t.Errorf("expected error %v, got %v", nil, err)
-			}
+			assert.NoError(t, err)
+
 			txDocsAfter, err := tr.GetOrderTransactions(ctx, tc.args.order.ToDTO())
-			if err != nil {
-				t.Errorf("expected error %v, got %v", nil, err)
-			}
+			assert.NoError(t, err)
 
 			if tc.expectedErr != nil {
 				if ordersDocsBefore != ordersDocsAfter {
@@ -113,9 +101,7 @@ func TestOrderMongoDB_Register(t *testing.T) {
 			}
 
 			if tc.postcondition != nil {
-				if err := tc.postcondition(); err != nil {
-					t.Errorf("expected error %v, got %v", nil, err)
-				}
+				assert.NoError(t, tc.postcondition())
 			}
 
 		})
