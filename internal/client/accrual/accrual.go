@@ -13,6 +13,7 @@ import (
 )
 
 type Client struct {
+	maxRPS     int
 	config     config.AccrualServiceConfig
 	httpClient *httppc.Client
 }
@@ -57,13 +58,20 @@ func (c *Client) GetAccrual(ctx context.Context, tx *transaction.DTO) (uint, err
 	}
 }
 
-func (c *Client) AdjustRPS(RPS int) {
-	c.config.RPS = RPS
-	c.httpClient = httppc.New(c.config.MaxPoolSize, RPS)
+func (c *Client) AdjustRPS(coeff float32) {
+	c.config.RPS = int(float32(c.GetRPS()) * coeff)
+	if c.config.RPS > c.maxRPS {
+		c.config.RPS = c.maxRPS
+	}
+	c.httpClient.AdjustRPS(c.config.RPS)
 }
 
 func (c *Client) GetRPS() int {
 	return c.config.RPS
+}
+
+func (c *Client) GetMaxRPS() int {
+	return c.maxRPS
 }
 
 func (c *Client) AdjustMaxPoolSize(MaxPoolSize int) {
@@ -73,6 +81,7 @@ func (c *Client) AdjustMaxPoolSize(MaxPoolSize int) {
 
 func NewClient(config config.AccrualServiceConfig) *Client {
 	return &Client{
+		maxRPS:     config.RPS,
 		config:     config,
 		httpClient: httppc.New(config.MaxPoolSize, config.RPS),
 	}

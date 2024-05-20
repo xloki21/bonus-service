@@ -53,7 +53,7 @@ func TestService_Polling(t *testing.T) {
 
 	t.Run("accrual service error: accrual not found", func(t *testing.T) {
 		t.Parallel()
-		ctrl := gomock.NewController(t) // New in go1.14+ no longer need to call ctrl.Finish()
+		ctrl := gomock.NewController(t)
 		ctxd, cancelFn := context.WithCancel(ctx)
 		defer cancelFn()
 
@@ -66,54 +66,51 @@ func TestService_Polling(t *testing.T) {
 
 		orderTransactions := faker.NewOrder(int(batchSize)).GetTransactions()
 
-		mock.
+		first := mock.
 			EXPECT().
 			FindUnprocessed(gomock.Any(), gomock.Eq(batchSize)).
 			Return(orderTransactions, nil)
 
-		mockRequest.
+		second := mockRequest.
 			EXPECT().
 			Do(gomock.Any()).
 			Return(&http.Response{
 				StatusCode: http.StatusNotFound,
-			}, apperr.AccrualNotFound).AnyTimes()
+			}, apperr.AccrualNotFound).Times(int(batchSize))
+
+		gomock.InOrder(first, second)
 
 		assert.ErrorIs(t, txProcessingRound(ctxd, s.repo, s.client, batchSize), apperr.TransactionProcessingError)
 	})
 
-	t.Run("accrual service error: too many requests", func(t *testing.T) {
+	t.Run("adjust RPS: N failed, then M successful rounds", func(t *testing.T) {
 		t.Parallel()
-		ctrl := gomock.NewController(t) // New in go1.14+ no longer need to call ctrl.Finish()
-		ctxd, cancelFn := context.WithCancel(ctx)
-		defer cancelFn()
+		ctrl := gomock.NewController(t)
 
-		mock := mocks.NewMockTransaction(ctrl)
 		client := accrual.NewClient(cfg.AccrualService)
-
 		mockRequest := httpcMocks.NewMockHTTPDoer(ctrl)
 		client.SetHTTPClient(mockRequest)
-		s := NewTransactionService(mock, client, cfg.TransactionServiceConfig)
 
-		orderTransactions := faker.NewOrder(int(batchSize)).GetTransactions()
+		failedRequestSequenceLength := 4
+		for try := 0; try < failedRequestSequenceLength; try++ {
+			client.AdjustRPS(0.95)
+		}
+		assert.Equal(t, 162, client.GetRPS())
 
-		mock.
-			EXPECT().
-			FindUnprocessed(gomock.Any(), gomock.Eq(batchSize)).
-			Return(orderTransactions, nil)
+		successfulRequestSequenceLength := 4
+		for try := 0; try < successfulRequestSequenceLength; try++ {
+			client.AdjustRPS(1.05)
+		}
+		assert.Equal(t, 195, client.GetRPS())
 
-		mockRequest.
-			EXPECT().
-			Do(gomock.Any()).
-			Return(&http.Response{
-				StatusCode: http.StatusTooManyRequests,
-			}, apperr.AccrualServiceTooManyRequests).AnyTimes()
+		client.AdjustRPS(1.05) // to make sure that the next round will be capped
+		assert.Equal(t, client.GetMaxRPS(), client.GetRPS())
 
-		assert.ErrorIs(t, txProcessingRound(ctxd, s.repo, s.client, batchSize), apperr.TransactionProcessingError)
 	})
 
 	t.Run("Success path: no new transactions to process", func(t *testing.T) {
 		t.Parallel()
-		ctrl := gomock.NewController(t) // New in go1.14+ no longer need to call ctrl.Finish()
+		ctrl := gomock.NewController(t)
 		ctxd, cancelFn := context.WithCancel(ctx)
 		defer cancelFn()
 
@@ -134,7 +131,7 @@ func TestService_Polling(t *testing.T) {
 
 	t.Run("Success path: all ok", func(t *testing.T) {
 		t.Parallel()
-		ctrl := gomock.NewController(t) // New in go1.14+ no longer need to call ctrl.Finish()
+		ctrl := gomock.NewController(t)
 
 		ctxd, cancelFn := context.WithTimeout(ctx, time.Second*5)
 		defer cancelFn()

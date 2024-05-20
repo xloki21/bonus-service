@@ -9,14 +9,12 @@ import (
 	"github.com/xloki21/bonus-service/internal/entity/transaction"
 	"github.com/xloki21/bonus-service/internal/repo"
 	"github.com/xloki21/bonus-service/pkg/log"
-	"math"
 	"sync"
 	"time"
 )
 
 const (
 	minSuccessfulRoundsToRestoreRPS = 10
-	maxRequestsPerSecond            = 20
 )
 
 type Transaction interface {
@@ -62,8 +60,7 @@ func txProcessingRound(ctx context.Context, repo repo.Transaction, client *accru
 			txs[index].Status = transaction.PROCESSED
 
 			if err := repo.Update(ctx, &txs[index]); err != nil {
-				errj := errors.Join(apperr.TransactionProcessingError, err)
-				errsCh <- errj
+				errsCh <- errors.Join(apperr.TransactionProcessingError, err)
 				return
 			}
 		}(wg, index)
@@ -99,13 +96,11 @@ func (s *Service) Polling(ctx context.Context) error {
 			logger.Info("polling events listener stopped")
 			return ctx.Err()
 		case <-ticker.C:
-
 			successfulRounds = successfulRounds + 1
 			if err := txProcessingRound(ctx, s.repo, s.client, batchSize); err != nil {
 				successfulRounds = 0
 				if errors.Is(err, apperr.AccrualServiceTooManyRequests) {
-					adjustedRPS := int(float32(s.client.GetRPS()) * 0.95)
-					s.client.AdjustRPS(adjustedRPS)
+					s.client.AdjustRPS(0.95)
 					break
 				}
 			}
@@ -113,9 +108,7 @@ func (s *Service) Polling(ctx context.Context) error {
 			if successfulRounds > minSuccessfulRoundsToRestoreRPS {
 				// try to restore RPS after successful rounds
 				successfulRounds = minSuccessfulRoundsToRestoreRPS
-				adjustedRPS := int(float32(s.client.GetRPS()) * 1.05)
-				adjustedRPS = int(math.Min(float64(adjustedRPS), float64(maxRequestsPerSecond))) // cap
-				s.client.AdjustRPS(adjustedRPS)
+				s.client.AdjustRPS(1.05)
 			}
 
 			logger.Info("rewarding accounts...")
