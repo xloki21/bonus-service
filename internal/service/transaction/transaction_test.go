@@ -153,7 +153,7 @@ func TestService_Polling(t *testing.T) {
 			Return(beforeTestOrderTxs, nil)
 
 		testRewardValue := uint(40)
-		for _ = range beforeTestOrderTxs {
+		for range beforeTestOrderTxs {
 			mockRequest.
 				EXPECT().
 				Do(gomock.Any()).
